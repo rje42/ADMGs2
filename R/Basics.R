@@ -1,5 +1,3 @@
-##' @exportPattern("^[^\.]")
-
 print.CADMG = function(x, ...) {
   w = x$v[x$vtypes=="fixed"]
   v = x$v[x$vtypes=="random"]
