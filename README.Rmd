@@ -1,0 +1,22 @@
+---
+output: html_document
+---
+
+# ADMGs
+
+This package allows for fitting discrete ADMGs via the `MixedGraphs` 
+package.
+
+Current features:
+
+* Fitting of graphs to contingency table.
+
+* Basic search procedure via `autoFit()`, using AIC or BIC.
+  
+To install the package, run the commands
+```
+install.packages("devtools")
+devtools::install_github("rje42/MixedGraphs") # dependency
+devtools::install_github("rje42/ADMGs2")
+library(ADMGs2)
+```
