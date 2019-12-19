@@ -5,8 +5,14 @@
 \alias{print.mixed_fit}
 \title{Fit data to an ADMG model}
 \usage{
-fitADMG(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
-  sparse = FALSE, quietly = TRUE)
+fitADMG(
+  dat,
+  graph,
+  r = TRUE,
+  tol = sqrt(.Machine$double.eps),
+  sparse = FALSE,
+  quietly = TRUE
+)
 }
 \arguments{
 \item{dat}{The data, as an array of counts or a data frame whose final

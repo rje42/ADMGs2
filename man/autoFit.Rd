@@ -4,8 +4,15 @@
 \alias{autoFit}
 \title{Find best ADMG model to data.}
 \usage{
-autoFit(dat, start = NULL, criterion = "AIC", quietly = FALSE, r = TRUE,
-  search = "basic", tol = 0.01)
+autoFit(
+  dat,
+  start = NULL,
+  criterion = "AIC",
+  quietly = FALSE,
+  r = TRUE,
+  search = "basic",
+  tol = 0.01
+)
 }
 \arguments{
 \item{dat}{Either an object of class \code{freq.table}, or a vector of
