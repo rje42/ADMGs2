@@ -10,8 +10,10 @@ fitADMG(
   graph,
   r = TRUE,
   tol = sqrt(.Machine$double.eps),
+  SEs = TRUE,
   sparse = FALSE,
-  quietly = TRUE
+  quietly = TRUE,
+  use_optim = TRUE
 )
 }
 \arguments{

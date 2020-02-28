@@ -1,8 +1,64 @@
-## NOT TESTED AND VERY INEFFICIENT
-.getMaps <- 
+##' @export print.mparam
+##' @method print mparam
+print.mparam <-
+  function(x, blanks=FALSE, ...) {
+    names = getMparamsNames(x, blanks=blanks)
+    values = unlist(x$q)
+    
+    cat(ifelse(x$r, "Recursive", "Non-recursive"), "ADMG parametrization\n", sep=" ")
+    
+    for (i in seq_along(values)) {
+      cat(names[i], " = ", values[i], "\n", sep="")
+    }
+  }
+
+
+##' Get head order from graph
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' @param heads list of heads
+##' @param check logical: should we check that each element of \code{head} could actually be a head?
+##' @param r logical: should heads be treated as recursive?
+##' 
+##' @details Returns integer vector giving a partition suitable 
+##' ordering for heads.  Not certain this works if \code{r=TRUE}.
+##' 
+getHeadOrder <- function(graph, heads, check=FALSE, r=FALSE) {
+  dis <- districts(graph)
+  
+  wh <- subsetmatch(sapply(heads, function(x) x[1]), dis)
+  out <- integer(length(heads))
+  
+  if (check) {
+    ## if we can be bothered then check that this could be a head
+    for (h in seq_along(heads)) {
+      if (!all(heads[[h]] %in% dis[wh[h]])) stop("'Head' not contained in a single district")
+    }
+  }
+ 
+  for (d in seq_along(dis)) {
+    if (sum(wh == d) == 0) next
+    
+    set.seed(213)
+    out[wh == d] <- quickSort(heads[wh == d], f = headOrder, graph=graph, random = TRUE)
+  }
+   
+  out
+}
+
+headOrder <- function(h1, h2, graph) {
+  if (setequal(h1, h2)) return(0)
+  if (is.subset(h1, anc(graph, h2))) return(1)
+  else if (is.subset(h2, anc(graph, h1))) return(-1)
+  
+  return(0)
+}
+
+## NOT TESTED AND PERHAPS VERY INEFFICIENT
+maps <- 
   function(graph, head_list, tail_list, dist_list, sparse = FALSE, dims = rep(2, n), r = TRUE) {
     
-    if (sparse) require(Matrix)
+    if (sparse) requireNamespace(Matrix)
     
     n = length(graph$v)
     # GET HEADS AND TAILS IF NECESSARY
@@ -11,7 +67,7 @@
       head_list <- lapply(o, function(x) x$heads)
       tail_list <- lapply(o, function(x) x$tails)
     }
-    else if(!is.list(head_list[[1]])) stop("Heads must be be by district")
+    else if(!is.list(head_list[[1]])) stop("Heads must be given by district")
     if (missing(dist_list)) dist_list = districts(graph)
     
     # get heads and tails not by district to use with factorize()
@@ -32,8 +88,8 @@
       # NUMBER OF TIMES WE NEED q_H|T IS NUMBER OF HEAD COMBINATIONS TIMES TAIL COMBINATIONS INSIDE DISTRICT
       vs = sort(dist_list[[d]])
       patail = sort(setdiff(pa(graph, vs), vs))
-      d.subs = combinations(dims[vs])
-      all.subs = combinations(dims[sort(c(vs,patail))])
+      d.subs = rje::combinations(dims[vs])
+      all.subs = rje::combinations(dims[sort(c(vs,patail))])
       
       # POSITIONS OF PARAMETERS
       tmp = sapply(head_list[[d]], function(x) prod(dims[x]-1)) * sapply(tail_list[[d]], function(x) prod(dims[x]))
@@ -49,10 +105,10 @@
         #      if (length(fctr$heads) == 0) next;
         if (length(fctr$tails) > 0) b.tail = sort.int(unique.default(unlist(fctr$tails)))
         else b.tail = integer(0)
-        bt.states = combinations(dims[b.tail])
+        bt.states = rje::combinations(dims[b.tail])
         tmp1 = matrix(0, nrow=nrow(probmap[[d]]), ncol=prod(dims[b.tail]))
         tmp2 = matrix(0, nrow=ncol(tmp1), ncol=ncol(paramap[[d]]))
-        
+
         # FILL IN NEW M BIT
         # rows IS ROWS WHERE CURRENT TERM IS NEEDED (WITH SIGN)
         rows = apply(all.subs[, match(vs, sort(c(vs,patail))), drop=FALSE], 1, function(x) all((x == d.subs[i,]) | (x == dims[vs]-1)))
@@ -111,8 +167,7 @@
 #' Given a full probability distribution over vertices of a graph, returns the
 #' value of the associated generalized Moebius parameters.
 #' 
-#' 
-#' @aliases getMoebius print.mparam
+#' @aliases moebius print.mparam
 #' @param graph An object of class \code{mixedgraph}, an ADMG.
 #' @param ptable An array containing a joint probability distribution over the
 #' vertices of \code{graph}.
@@ -131,12 +186,12 @@
 #' @section Warning : This function does not verify that the given distribution
 #' satisfies the conditions of the model for the maps being calculated, and
 #' thus the distribution will not necessarily be recovered by mapping back
-#' using \code{getProbs}.
+#' using \code{probdist}.
 #' 
 #' Note this function will not generally return correct values for parameters
-#' in the recursive parametrization unless all probabilities are equal.
+#' in the recursive parametrization unless all variables are independent.
 #' @author Robin Evans
-#' @seealso \code{\link{getProbs}}.
+#' @seealso \code{\link{probdist}}.
 #' @references Evans and Richardson (2010)
 #' @examples
 #' 
@@ -144,16 +199,18 @@
 #' 
 #' # Distribution of complete independence
 #' ptable = array(1/32, rep(2,5))
-#' getMoebius(gr2, ptable, r=TRUE)
+#' moebius(gr2, ptable, r=TRUE)
 #' 
-getMoebius <-
-  function (graph, ptable, r=TRUE) {
+#' @export moebius
+moebius <-
+  function (graph, ptable, dims=rep(2,n), r=TRUE) {
+    n <- length(graph$vnames)
     ht = headsTails(graph, r = r, byDist = TRUE)
     head_list <- lapply(ht, function(x) x$heads)
     tail_list <- lapply(ht, function(x) x$tails)
     
     # head_list = tmp$heads; tail_list = tmp$tails
-    dims = dim(ptable)
+    if (!missing(ptable)) dims = dim(ptable)
     
     q = vector(mode="list", length=length(ht))
     # EACH DISTRICT i
@@ -162,16 +219,22 @@ getMoebius <-
       # EACH HEAD j
       for (j in seq_along(q[[i]])) {
         # ALL POSSIBLE TAIL ASSIGNMENTS
-        vals = combinations(dims[tail_list[[i]][[j]]])
+        vals = rje::combinations(dims[tail_list[[i]][[j]]])
         q[[i]][[j]] = vector(mode="list", length=dim(vals)[1])
         
         # EACH TAIL ASSIGNMENT k
         for (k in seq_len(dim(vals)[1])) {
-          # GET CONDITIONAL PROBABILITIES
-          tmp = condition.table(ptable, head_list[[i]][[j]], tail_list[[i]][[j]], vals[k,]+1)
-          # NEED ALL BUT LAST VALUE IN EACH DIMENSION
-          if (is.vector(tmp)) q[[i]][[j]][[k]] = tmp[-length(tmp)]
-          else q[[i]][[j]][[k]] = subarray(tmp, lapply(dim(tmp)-1, seq_len))
+          if (missing(ptable)) {
+            ## assume parameters are uniform
+            q[[i]][[j]][[k]] <- array(1/prod(dims[head_list[[i]][[j]]]), dims[head_list[[i]][[j]]]-1)
+          }
+          else {
+            # GET CONDITIONAL PROBABILITIES
+            tmp = condition.table(ptable, head_list[[i]][[j]], tail_list[[i]][[j]], vals[k,]+1)
+            # NEED ALL BUT LAST VALUE IN EACH DIMENSION
+            if (is.vector(tmp)) q[[i]][[j]][[k]] = tmp[-length(tmp)]
+            else q[[i]][[j]][[k]] = subarray(tmp, lapply(dim(tmp)-1, seq_len))
+          }
         }
       }
     }
@@ -191,6 +254,7 @@ getMoebius <-
 #' 
 #' @param mparam An object of class \code{mparam}.
 #' @param blanks logical indicating whether to omit repeated names.
+#' 
 #' @return A string valued vector containing the names in head order.
 #' @note Note that if the Moebius parametrization is with respect to the
 #' recursive factorization, some of the parameters may be reweighted
@@ -201,7 +265,7 @@ getMoebius <-
 #' @examples
 #' 
 #' data(gr2)
-#' mparams = getMoebius(gr2, makeptable(gr2, values=rep(1/32, 32)))
+#' mparams = moebius(gr2, prob_table(gr2, values=rep(1/32, 32)))
 #' 
 #' getMparamsNames(mparams)
 #' 
@@ -220,8 +284,8 @@ getMparamsNames <-
       h.len = length(heads[[i]][[j]])
       t.len = length(tails[[i]][[j]])
       
-      t.vals = combinations(dims[tails[[i]][[j]]])
-      h.vals = combinations(dims[heads[[i]][[j]]]-1)
+      t.vals = rje::combinations(dims[tails[[i]][[j]]])
+      h.vals = rje::combinations(dims[heads[[i]][[j]]]-1)
       
       for (k1 in seq_len(dim(t.vals)[1])) for (k2 in seq_len(dim(h.vals)[1]))  {
         #cat("head =",heads[[i]][[j]], "tail =",tails[[i]][[j]],"\n")
@@ -249,17 +313,6 @@ getMparamsNames <-
     out
   }
 
-print.mparam <-
-  function(x, blanks=FALSE, ...) {
-    names = getMparamsNames(x, blanks=blanks)
-    values = unlist(x$q)
-    
-    cat(ifelse(x$r, "Recursive", "Non-recursive"), "ADMG parametrization\n", sep=" ")
-    
-    for (i in seq_along(values)) {
-      cat(names[i], " = ", values[i], "\n", sep="")
-    }
-  }
 
 #' Constructs probability array for graph
 #' 
@@ -276,9 +329,10 @@ print.mparam <-
 #' @examples
 #' 
 #' data(gr1)
-#' makeptable(gr1)
+#' prob_table(gr1)
 #' 
-makeptable <-
+#' @export prob_table
+prob_table <-
   function(graph, dims = rep(2, n), values = 1/prod(dims)) {
     n <- length(graph$v)
     

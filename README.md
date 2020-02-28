@@ -1,8 +1,4 @@
----
-output: html_document
----
-
-# ADMGs
+# ADMGs2
 
 This package allows for fitting discrete ADMGs via the `MixedGraphs` 
 package.

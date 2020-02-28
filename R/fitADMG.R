@@ -44,55 +44,105 @@
 #' summary(out)
 #' # not a good fit!
 #' 
-fitADMG <-
-  function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps), sparse = FALSE, quietly = TRUE) {
-    n = max(graph$v)
-    if (tol < 0) stop("Tolerance must be positive")
-    
-    if(is.data.frame(dat)) {
-      dat = plyr::daply(dat, seq_len(n), function(x) x[[n+1]])
+#' @export fitADMG
+fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps), 
+                    SEs = TRUE, sparse = FALSE, quietly = TRUE, use_optim=TRUE) {
+  n = max(graph$v)
+  if (tol < 0) stop("Tolerance must be positive")
+  
+  if (is.array(dat)) dims = dim(dat)
+  else dims = sapply(dat[,-ncol(dat),drop=FALSE], max)+1
+  
+  params = moebius(graph, dims=dims, r=r)
+  if (!quietly) cat("Getting maps\n")
+  maps0 = maps(graph, sparse = sparse, dims = dims, r=r)
+  
+  ## # ORDER DATA AND ADD 0s IF NECESSARY
+  ## dat = orderData(dat)
+  ## new.dat = cbind(combinations(dims), 0)
+  ## rows = prodlim::row.match(dat[,seq_len(n)], new.dat[,seq_len(n)])
+  ## new.dat[rows, n+1] = dat[, n+1]
+  ## dat = array(new.dat[,n+1], dim=dims)
+  
+  # SUFFICIENT STATISTICS ARE COUNTS OVER D \cup pa(D), FOR DISTRICT D.
+  # WRITE AS A LIST OF THESE.
+  # if(is.data.frame(dat)) {
+  #   dat = plyr::daply(dat, seq_len(n), function(x) x[[n+1]])
+  # }
+  
+  dist.dat = list()
+  for (d in seq_along(maps0$dists)) {
+    if (is.array(dat)) dist.dat[[d]] = margin.table(dat, maps0$pa.dists[[d]])
+    else {
+      comb <- rje::combinations(dims[maps0$pa.dists[[d]]])
+      dist.dat[[d]] <- array(dims[maps0$pa.dists[[d]]])
+
+      for (i in seq_len(nrow(comb))) {
+        inc <- (rowSums(dat[,maps0$pa.dists[[d]],drop=FALSE] == comb[rep(i, nrow(dat)),,drop=FALSE]) == length(maps0$pa.dists[[d]]))
+        dist.dat[[d]][i] <- sum(dat[inc, n+1])
+      }
     }
+    if (isTRUE(any(dist.dat[[d]] == 0))) warning("Zero counts in sufficient statistics")
+  }
+
+  # INITIAL TOLERANCE  FOR .doone
+  tol2 = 1e-1
+  move = 2*tol
+
+  if (!quietly) cat("Fitting: ")
+
+  if (use_optim) {
+    out_optim <- suppressWarnings(optim(unlist(params$q), fn = function(x) -.logLik(dat=dist.dat, q=relist(x, params$q), maps=maps0),
+                       control=list(reltol=100*tol)))
+    params$q <- relist(out_optim$par, params$q)
+
+    # now do Newton's method to get even closer
+    out_optim <- suppressWarnings(optim(unlist(params$q), fn = function(x) -.logLik(dat=dist.dat, q=relist(x, params$q), maps=maps0),
+                       gr = function(x) -.DlogLik(dat=dist.dat, q=relist(x, params$q), maps=maps0),
+                       method="BFGS", control=list(reltol=tol)))
+    params$q <- relist(out_optim$par, params$q)
     
-    dims = dim(dat)
-    
-    params = getMoebius(graph, makeptable(graph, dims=dims), r=r)
-    if (!quietly) cat("Getting maps\n")
-    maps = .getMaps(graph, sparse = sparse, dims = dims, r=r)
-    
-    ## # ORDER DATA AND ADD 0s IF NECESSARY
-    ## dat = orderData(dat)
-    ## new.dat = cbind(combinations(dims), 0)
-    ## rows = prodlim::row.match(dat[,seq_len(n)], new.dat[,seq_len(n)])
-    ## new.dat[rows, n+1] = dat[, n+1]
-    ## dat = array(new.dat[,n+1], dim=dims)
-    
-    # SUFFICIENT STATISTICS ARE COUNTS OVER D \cup pa(D), FOR DISTRICT D.
-    # WRITE AS A LIST OF THESE.
-    dist.dat = list()
-    for (d in seq_along(maps$dists)) {
-      dist.dat[[d]] = margin.table(dat, maps$pa.dists[[d]])
-      if (isTRUE(any(dist.dat[[d]] == 0))) warning("Zero counts in sufficient statistics")
-    }
-    
-    # INITIAL TOLERANCE  FOR .doone
-    tol2 = 1e-1
-    move = 2*tol
-    
-    if (!quietly) cat("Fitting: ")
+    # print(out_optim$value)
+    # print((function(x) -.logLik(dat=dist.dat, q=relist(x, params$q), maps=maps0))(out_optim$par))
+    # print(numDeriv::grad(out_optim$par, func=function(x) -.logLik(dat=dist.dat, q=relist(x, params$q), maps=maps0)))
+  }
+  else {
     count = 1
     
     while (move > tol || tol2 > sqrt(.Machine$double.eps)) {
-      new.params = .doone(dist.dat, graph, params, maps, tol = tol2, quietly = quietly)
-      move = .logLik(dist.dat, new.params$q, maps) - .logLik(dist.dat, params$q, maps)
+      new.params = .doone(dist.dat, graph, params, maps0, tol = tol2, quietly = quietly)
+      move = .logLik(dist.dat, new.params$q, maps0) - .logLik(dist.dat, params$q, maps0)
       params = new.params
       tol2 = tol2/10
       if (!quietly) cat(count," ")
+      # print(params$q[[1]][[15]][[1]][13:16])
       count = count+1
     }
     if (!quietly) cat("\n")
-    
-    out = list(params = params, ll = .logLik(dist.dat, params$q, maps), dat=dat, graph=graph, dim=dims, maps=maps, r=r)
-    class(out) = "mixed_fit"
-    out
   }
+  
+  out = list(params = params, ll = .logLik(dist.dat, params$q, maps0), dat=dat, graph=graph, dim=dims, maps=maps0, r=r)
+  class(out) = "mixed_fit"
+  
+  if (SEs) {
+    requireNamespace("numDeriv")
+    if (!quietly) cat("Computing SEs")
+    
+    if (prod(dims) > 5e3) {
+      f <- function(x) {
+        q <- relist(x, params$q)
+        -.logLik(dist.dat, q, maps0)
+      }
+      FIM <- numDeriv::hessian(f, x=unlist(params$q))
+    }
+    else FIM <- .fisher_mixed_fit(out)
+
+    out$SEs <- sqrt(diag(solve.default(FIM)))
+        
+    if (!quietly) cat("\n")  
+  }
+  else out$SEs <- NULL
+
+  out
+}
 

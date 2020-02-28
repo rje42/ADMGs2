@@ -54,7 +54,7 @@ aridProj <- function (graph, maximal=TRUE) {
     }
     
     ## if we want a maximal graph, check if <v,w> is bidirected connected
-    if (maximal) {
+    if (bi_adj_out[v,w] == 0 && maximal) {
       if (length(districts(graph[intrinsicClosure(graph, c(v,w))])) == 1) {
         bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
       }
@@ -75,8 +75,11 @@ aridProj <- function (graph, maximal=TRUE) {
 ##' 
 is_arid <- function(graph){
   
+  w <- c(ch(graph, graph$v), sib(graph, graph$v))
+  vs <- unique.default(w)
+    
   ## if intrinsic closure contains more than v, then not arid
-  for (v in graph$v) {
+  if (length(vs) > 0) for (v in vs) {
     if (length(intrinsicClosure(graph, v)) > 1) return(FALSE)
   }
   

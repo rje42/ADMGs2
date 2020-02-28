@@ -1,3 +1,15 @@
+##' @import MixedGraphs
+
+graphOptionsEnv <- MixedGraphs:::graphOptionsEnv
+
+## List of vertex types, which can be expanded [not currently supported]
+## type     : character name of vertex type
+assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
+                                   hidden=c(FALSE, FALSE)), 
+       envir=graphOptionsEnv)
+
+##' @method print CADMG
+##' @export print.CADMG
 print.CADMG = function(x, ...) {
   w = x$v[x$vtypes=="fixed"]
   v = x$v[x$vtypes=="random"]
@@ -55,10 +67,13 @@ print.CADMG = function(x, ...) {
 ##' Given a CADMG or ADMG returns the CADMG obtained by 
 ##' fixing the vertices in \code{w}.
 ##' 
+##' @export fix
 fix = function(graph, w, v) {
   if (missing(v)) v = setdiff(graph$v, w)
   else if (length(intersect(w,v))) stop("Fixed and random vertex sets must be disjoint")
-  else if (!missing(v)) graph = graph[c(w,v)]
+  else graph = graph[c(w,v)]
+  
+  if (any(!(c(w,v) %in% graph$v))) stop(paste("No node ", paste(setdiff(c(w,v), graph$v), sep=", "), " found", sep=""))
   
   graph <- withEdgeList(graph)
   

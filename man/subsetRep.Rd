@@ -14,3 +14,8 @@ subsetRep(graph, max_size, sort = 1)
 \description{
 Get the subset representation of an ordinary ADMG
 }
+\details{
+This returns sets of the form \code{HuA}, where \code{A} is any 
+subset of \code{tail(H)}.  This representation is shown to 
+correspond precisely to ordinary Markov equivalence.
+}

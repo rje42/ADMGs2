@@ -20,7 +20,7 @@ Lists the (recursive) heads and tails for a CADMG
 }
 \details{
 The result is a list containing elements of the 
-same length named \code{heads}, \code{tails} and (optionally) 
+same length named \code{heads}, \code{tails} and 
 \code{intrinsic} giving the heads, tails and intrinsic sets.
 If \code{byDist} is \code{TRUE} then result is a list 
 each of which is of the above format, corresponding to the 

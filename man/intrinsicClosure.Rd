@@ -6,6 +6,13 @@
 \usage{
 intrinsicClosure(graph, set, sort = 1)
 }
+\arguments{
+\item{graph}{object of class \code{mixedgraph}}
+
+\item{set}{set of vertices to find intrisic closure ot}
+
+\item{sort}{}
+}
 \description{
 Find intrinsic closure of a connected set
 }

@@ -4,15 +4,33 @@
 \alias{intrinsicSets}
 \title{Finds the set of all intrinsic sets of a CADMG}
 \usage{
-intrinsicSets(graph, r = TRUE, byDist = FALSE)
+intrinsicSets(graph, r = TRUE, by_district = FALSE, sort = 2, recall = FALSE)
 }
 \arguments{
-\item{graph}{object of class \code{mixedgraph}}
+\item{graph}{object of class \code{mixedgraph}, must be an ADMG.}
 
-\item{r}{should recursive (i.e. nested) method be used?}
+\item{r}{logical, should recursive head definition be used? Defaults to \code{TRUE}}
 
-\item{byDist}{should results be grouped by district?}
+\item{by_district}{logical, should intrinsic sets be grouped by district? Defaults to \code{FALSE}}
+
+\item{sort}{should output be sorted/unique?}
+
+\item{recall}{logical: is this a recalling of the function (internal use only)}
+
+\item{byDist}{should results be grouped by district?
+List Intrinsic Sets of Summary Graph or ADMG
+
+List Intrinsic Sets of a Summary Graph or Acyclic Directed Mixed Graph, possibly by district.}
 }
 \description{
 Finds the set of all intrinsic sets of a CADMG
+}
+\details{
+\code{intrinsicSets} returns a list of integer vectors, 
+each being an intrinsic set (or if \code{by_district = TRUE} 
+a list of lists, each containing the intrinsic sets in a single 
+district). If \code{r = FALSE} the intrinsic sets are the heads 
+and their dis-tails.
+
+\code{intrinsicClosure} returns an integer vector containing the closure of set.
 }

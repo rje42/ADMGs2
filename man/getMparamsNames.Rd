@@ -30,7 +30,7 @@ probabilities of the joint distribution.
 \examples{
 
 data(gr2)
-mparams = getMoebius(gr2, makeptable(gr2, values=rep(1/32, 32)))
+mparams = moebius(gr2, prob_table(gr2, values=rep(1/32, 32)))
 
 getMparamsNames(mparams)
 

@@ -20,6 +20,8 @@
 #' directed mixed graphs to binary data. \emph{UAI-10}.
 #' @keywords graphs
 #' 
+#' @export summary.mixed_fit
+#' @method summary mixed_fit
 summary.mixed_fit <-
 function (object, fisher=TRUE, ...) {
   q = object$params$q
@@ -29,17 +31,20 @@ function (object, fisher=TRUE, ...) {
   AIC = 2*p - 2*object$ll
   BIC = log(n_obs)*p - 2*object$ll
   
-  ll.sat = sum(object$dat*log(object$dat/n_obs))
+  if (is.array(object$dat)) ll.sat = sum(object$dat*log(object$dat/n_obs))
+  else ll.sat = sum(object$dat$freq*log(object$dat$freq/n_obs))
   deviance = 2*(ll.sat - object$ll)
   
   if (fisher) FIM = .fisher_mixed_fit(object)
   else FIM = NULL
-  probs = getProbs(object$params, object$maps)
+  probs = probdist(object$params, object$maps)
 
   se.table = matrix(NA, ncol=2, nrow=p, dimnames = list(getMparamsNames(object$params), c("Estimate", "Std. Error")))
   qvec = unlist(q)
   se.table[,1] = qvec
-  if (fisher) se.table[,2] = sqrt(diag(solve(FIM)))
+  if (!is.null(object$SEs)) se.table[,2] = object$SEs
+  else if (fisher) se.table[,2] = sqrt(diag(solve.default(FIM)))
+  else se.table[,2] <- NA
 
   out = c(object, list(p=p, AIC=AIC, BIC=BIC, deviance=deviance, se.table=se.table, FIM=FIM, probs=probs))
   class(out) = "mixed_fit_summary"
@@ -47,7 +52,8 @@ function (object, fisher=TRUE, ...) {
 }
 
 
-
+##' @export print.mixed_fit
+##' @method print mixed_fit
 print.mixed_fit <-
   function (x, ...) {
     q = x$params$q
@@ -61,6 +67,8 @@ print.mixed_fit <-
   }
 
 
+##' @export print.mixed_fit_summary
+##' @method print mixed_fit_summary
 print.mixed_fit_summary <-
   function (x, ...) {
     cat("Acyclic Directed Mixed Graph fit to discrete data\n")
