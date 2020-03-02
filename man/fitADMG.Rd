@@ -28,10 +28,14 @@ be used.}
 \item{tol}{Numeric; if log-likelihood increases by less that \code{tol} in
 one step, procedure stops.}
 
+\item{SEs}{logical: should standard errors be calculated?}
+
 \item{sparse}{Should sparse matrices be used?  Requires package
 \code{Matrix}.}
 
 \item{quietly}{Logical indicating whether output should be suppressed.}
+
+\item{use_optim}{should \code{optim} be used for fitting?}
 }
 \value{
 An object of class \code{mixed_fit}.  This is a list containing
@@ -61,10 +65,10 @@ be positive.  A warning will be produced if this is not so.
 
 \examples{
 
-data(gss.small)
-data(gr1)
+data(gss_small)
+data(gr1, package="MixedGraphs")
 
-out = fitADMG(gss.small, gr1)
+out = fitADMG(gss_small, gr1)
 summary(out)
 # not a good fit!
 
@@ -76,7 +80,7 @@ directed mixed graphs to binary data. \emph{UAI-10}.
 Richardson, T.S., Robins, J.M., Shpitser, I., Evans, R.J. (2012) -
 }
 \seealso{
-\code{\link{summary_mixed_fit}} \code{\link{autoFit}}
+\code{\link{summary.mixed_fit}} \code{\link{autoFit}}
 }
 \author{
 Robin Evans, Ilya Shpitser

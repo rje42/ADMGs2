@@ -2,10 +2,21 @@
 % Please edit documentation in R/Basics.R
 \name{random}
 \alias{random}
-\title{Get vector of random nodes in CADMG}
+\alias{fixed}
+\title{Get vector of fixed or random nodes in CADMG}
 \usage{
 random(graph)
+
+fixed(graph)
+}
+\arguments{
+\item{graph}{a \code{mixedgraph} that is also a \code{CADMG}}
 }
 \description{
-Get vector of random nodes in CADMG
+Get vector of fixed or random nodes in CADMG
 }
+\section{Functions}{
+\itemize{
+\item \code{fixed}: get fixed nodes
+}}
+

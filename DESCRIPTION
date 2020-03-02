@@ -8,10 +8,16 @@ Description: Functions for manipulating and fitting models with discrete
              mixed graphs. 
 Depends: R (>= 3.1.2)
 Imports: MixedGraphs,
+         Matrix,
+         methods,
          numDeriv,
          rje,
          utils,
-License: GPLv2
+License: GPL-2
 LazyData: true
 RoxygenNote: 7.0.2
-Suggests: testthat
+Suggests: 
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

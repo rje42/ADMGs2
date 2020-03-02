@@ -19,9 +19,9 @@ Some datasets for illustration.
 }
 \section{Functions}{
 \itemize{
-\item \code{gss}: another graph
+\item \code{gss}: Data from the General Social Survey
 
-\item \code{gss_small}: The instrumental variables graph
+\item \code{gss_small}: Subset of data from the General Social Survey
 }}
 
 \keyword{datasets}

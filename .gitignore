@@ -1,6 +1,8 @@
+ADMGs2.Rproj
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 Rprof.out
 ._*
+inst/doc

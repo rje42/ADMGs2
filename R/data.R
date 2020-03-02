@@ -6,8 +6,9 @@
 ##' 
 "twins"
 
-##' @describeIn twins another graph
+##' @describeIn twins Data from the General Social Survey
 "gss"
 
-##' @describeIn twins The instrumental variables graph
+##' @describeIn twins Subset of data from the General Social Survey
 "gss_small"
+

@@ -29,10 +29,11 @@ probabilities of the joint distribution.
 }
 \examples{
 
-data(gr2)
+data(gr2, package="MixedGraphs")
 mparams = moebius(gr2, prob_table(gr2, values=rep(1/32, 32)))
 
-getMparamsNames(mparams)
+ADMGs2:::getMparamsNames(mparams)
+
 
 }
 \references{

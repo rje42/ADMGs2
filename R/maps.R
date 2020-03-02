@@ -1,4 +1,3 @@
-##' @export print.mparam
 ##' @method print mparam
 print.mparam <-
   function(x, blanks=FALSE, ...) {
@@ -54,11 +53,12 @@ headOrder <- function(h1, h2, graph) {
   return(0)
 }
 
+##' @importFrom Matrix Matrix
 ## NOT TESTED AND PERHAPS VERY INEFFICIENT
 maps <- 
   function(graph, head_list, tail_list, dist_list, sparse = FALSE, dims = rep(2, n), r = TRUE) {
     
-    if (sparse) requireNamespace(Matrix)
+    if (sparse) requireNamespace("Matrix")
     
     n = length(graph$v)
     # GET HEADS AND TAILS IF NECESSARY
@@ -94,7 +94,7 @@ maps <-
       # POSITIONS OF PARAMETERS
       tmp = sapply(head_list[[d]], function(x) prod(dims[x]-1)) * sapply(tail_list[[d]], function(x) prod(dims[x]))
       t = c(1,cumsum(tmp)+1) # STARTING POSITIONS OF q_H|T
-      p = tail(t,1)-1 # NUMBER OF PARAMETERS
+      p = last(t)-1 # NUMBER OF PARAMETERS
       
       # MATRICES M, P
       probmap[[d]] = matrix(NA, nrow=prod(dims[c(vs, patail)]), ncol=0)
@@ -153,8 +153,8 @@ maps <-
         }
       }
       if (sparse) {
-        probmap[[d]] = Matrix(probmap[[d]])
-        paramap[[d]] = Matrix(paramap[[d]])
+        probmap[[d]] = Matrix::Matrix(probmap[[d]])
+        paramap[[d]] = Matrix::Matrix(paramap[[d]])
       }
     }
     
@@ -171,6 +171,7 @@ maps <-
 #' @param graph An object of class \code{mixedgraph}, an ADMG.
 #' @param ptable An array containing a joint probability distribution over the
 #' vertices of \code{graph}.
+#' @param dims if \code{ptable} is not an array, gives dimensions of each vertex
 #' @param r logical - should recursive factorizations be used?
 #' @return An object of class \code{mparams}.  That is, a list containing:
 #' \item{q}{The Moebius parameters.  \code{q[[d]][[i]][[j]]} is a numeric array
@@ -195,7 +196,7 @@ maps <-
 #' @references Evans and Richardson (2010)
 #' @examples
 #' 
-#' data(gr2)
+#' data(gr2, package="MixedGraphs")
 #' 
 #' # Distribution of complete independence
 #' ptable = array(1/32, rep(2,5))
@@ -264,10 +265,11 @@ moebius <-
 #' directed mixed graphs to binary data. \emph{UAI-10}.
 #' @examples
 #' 
-#' data(gr2)
+#' data(gr2, package="MixedGraphs")
 #' mparams = moebius(gr2, prob_table(gr2, values=rep(1/32, 32)))
 #' 
-#' getMparamsNames(mparams)
+#' ADMGs2:::getMparamsNames(mparams)
+#' 
 #' 
 getMparamsNames <-
   function(mparam, blanks = FALSE) {

@@ -1,3 +1,4 @@
+data(gr2, package = "MixedGraphs")
 int1 <- intrinsicSets(gr2, r=TRUE, sort=2)
 int0 <- intrinsicSets(gr2, r=FALSE, sort=2)
 

@@ -179,6 +179,7 @@
 ##' 
 ##' @param graph ADMG
 ##' @param max_size largest set to consider
+##' @param sort if 1, returns unique sets, if 2 returns sorted sets
 ##' 
 ##' @details This returns sets of the form \code{HuA}, where \code{A} is any 
 ##' subset of \code{tail(H)}.  This representation is shown to 

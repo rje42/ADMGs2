@@ -13,6 +13,8 @@ moebius(graph, ptable, dims = rep(2, n), r = TRUE)
 \item{ptable}{An array containing a joint probability distribution over the
 vertices of \code{graph}.}
 
+\item{dims}{if \code{ptable} is not an array, gives dimensions of each vertex}
+
 \item{r}{logical - should recursive factorizations be used?}
 }
 \value{
