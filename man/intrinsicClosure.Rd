@@ -11,7 +11,7 @@ intrinsicClosure(graph, set, sort = 1)
 
 \item{set}{set of vertices to find intrisic closure ot}
 
-\item{sort}{}
+\item{sort}{if sort > 1 then output is sorted}
 }
 \description{
 Find intrinsic closure of a connected set

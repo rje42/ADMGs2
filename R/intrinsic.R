@@ -5,7 +5,7 @@
 ##' @param graph object of class \code{graph}, should be a CADMG
 ##' @param r logical indicating if recursive heads should be used
 ##' @param byDist logical indicating if results should be returned separated by district
-##' @param instrinsic optionally, a list of the relevant intrinsic sets of the ADMG
+##' @param intrinsic optionally, a list of the relevant intrinsic sets of the ADMG
 ##' 
 ##' @details The result is a list containing elements of the 
 ##' same length named \code{heads}, \code{tails} and 
@@ -26,7 +26,7 @@ headsTails = function (graph, r = TRUE, byDist = FALSE, intrinsic)
     else {
       dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
       pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-      return(mapply(function(i,j,k) headsTails(graph[i,j], r=r, byDist=FALSE, k), dists, pas, intrisic, SIMPLIFY=FALSE))
+      return(mapply(function(i,j,k) headsTails(graph[i,j], r=r, byDist=FALSE, k), dists, pas, intrinsic, SIMPLIFY=FALSE))
     }
   }
   
@@ -46,11 +46,11 @@ headsTails = function (graph, r = TRUE, byDist = FALSE, intrinsic)
   out
 }
 
-##' Finds the set of all intrinsic sets of a CADMG
-##' 
-##' @param graph object of class \code{mixedgraph}
-##' @param r should recursive (i.e. nested) method be used?
-##' @param byDist should results be grouped by district?
+## Finds the set of all intrinsic sets of a CADMG
+## 
+## @param graph object of class \code{mixedgraph}
+## @param r should recursive (i.e. nested) method be used?
+## @param byDist should results be grouped by district?
 #
 # Algorithm (for recursive case):
 #
@@ -243,7 +243,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
 ##' 
 ##' @param graph object of class \code{mixedgraph}
 ##' @param set set of vertices to find intrisic closure ot
-##' @param sort 
+##' @param sort if sort > 1 then output is sorted
 ##' 
 ##' @export intrinsicClosure
 intrinsicClosure = function(graph, set, sort=1) {

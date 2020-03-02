@@ -13,7 +13,7 @@ headsTails(graph, r = TRUE, byDist = FALSE, intrinsic)
 
 \item{byDist}{logical indicating if results should be returned separated by district}
 
-\item{instrinsic}{optionally, a list of the relevant intrinsic sets of the ADMG}
+\item{intrinsic}{optionally, a list of the relevant intrinsic sets of the ADMG}
 }
 \description{
 Lists the (recursive) heads and tails for a CADMG

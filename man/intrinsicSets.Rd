@@ -2,7 +2,7 @@
 % Please edit documentation in R/intrinsic.R
 \name{intrinsicSets}
 \alias{intrinsicSets}
-\title{Finds the set of all intrinsic sets of a CADMG}
+\title{List Intrinsic Sets of Summary Graph or ADMG}
 \usage{
 intrinsicSets(graph, r = TRUE, by_district = FALSE, sort = 2, recall = FALSE)
 }
@@ -16,14 +16,9 @@ intrinsicSets(graph, r = TRUE, by_district = FALSE, sort = 2, recall = FALSE)
 \item{sort}{should output be sorted/unique?}
 
 \item{recall}{logical: is this a recalling of the function (internal use only)}
-
-\item{byDist}{should results be grouped by district?
-List Intrinsic Sets of Summary Graph or ADMG
-
-List Intrinsic Sets of a Summary Graph or Acyclic Directed Mixed Graph, possibly by district.}
 }
 \description{
-Finds the set of all intrinsic sets of a CADMG
+List Intrinsic Sets of a Summary Graph or Acyclic Directed Mixed Graph, possibly by district.
 }
 \details{
 \code{intrinsicSets} returns a list of integer vectors, 

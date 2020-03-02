@@ -10,6 +10,8 @@ subsetRep(graph, max_size, sort = 1)
 \item{graph}{ADMG}
 
 \item{max_size}{largest set to consider}
+
+\item{sort}{if 1, returns unique sets, if 2 returns sorted sets}
 }
 \description{
 Get the subset representation of an ordinary ADMG

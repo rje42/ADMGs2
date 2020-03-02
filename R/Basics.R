@@ -1,4 +1,17 @@
+##' @import rje
 ##' @import MixedGraphs
+##' 
+##' @importFrom methods is
+##' @importFrom utils relist
+##' @importFrom stats rbeta
+##' @importFrom stats optim
+##' @importFrom numDeriv hessian
+##' 
+## @importFrom rje combinations
+## @importFrom rje quickSort
+## @importFrom rje is.subset
+## @importFrom rje powerSet
+## @importFrom rje subsetmatch
 
 graphOptionsEnv <- MixedGraphs:::graphOptionsEnv
 
@@ -8,8 +21,14 @@ assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
                                    hidden=c(FALSE, FALSE)), 
        envir=graphOptionsEnv)
 
+##' Print method for a CADMG object
+##' 
+##' @param x a \code{mixedgraph} that is also a \code{CADMG}
+##' @param ... other arguments to print
+##' 
+##' @details Prints a CADMG nicely onto the standard output
+##' 
 ##' @method print CADMG
-##' @export print.CADMG
 print.CADMG = function(x, ...) {
   w = x$v[x$vtypes=="fixed"]
   v = x$v[x$vtypes=="random"]
@@ -97,7 +116,10 @@ fix = function(graph, w, v) {
   out
 }
 
-##' Get vector of random nodes in CADMG
+##' Get vector of fixed or random nodes in CADMG
+##' 
+##' @param graph a \code{mixedgraph} that is also a \code{CADMG}
+##' 
 random = function(graph) {
   if (is(graph, "CADMG")) {
     return(graph$v[(graph$vtypes == "random")])
@@ -105,14 +127,26 @@ random = function(graph) {
   else return(graph$v)
 }
 
-##' Compute non-recursive dis-tail
-distail = function(graph, head) {
-  subgraph = graph[anc(graph, head)]
-  vs = dis(subgraph, head)
-  out = setdiff(vs, head)
-  
-  out
+##' @describeIn random get fixed nodes
+fixed = function(graph) {
+  if (is(graph, "CADMG")) {
+    return(graph$v[(graph$vtypes == "fixed")])
+  }
+  else return(integer(0))
 }
+
+# ##' Compute non-recursive dis-tail
+# ##' 
+# ##' @param graph a \code{mixedgraph} that is also a \code{(C)ADMG}
+# ##' @param head set to calculate \code{distail} for
+# ##' 
+# distail = function(graph, head) {
+#   subgraph = graph[anc(graph, head)]
+#   vs = dis(subgraph, head)
+#   out = setdiff(vs, head)
+#   
+#   out
+# }
 
 
 

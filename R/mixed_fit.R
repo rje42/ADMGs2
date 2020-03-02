@@ -20,7 +20,6 @@
 #' directed mixed graphs to binary data. \emph{UAI-10}.
 #' @keywords graphs
 #' 
-#' @export summary.mixed_fit
 #' @method summary mixed_fit
 summary.mixed_fit <-
 function (object, fisher=TRUE, ...) {
@@ -52,7 +51,6 @@ function (object, fisher=TRUE, ...) {
 }
 
 
-##' @export print.mixed_fit
 ##' @method print mixed_fit
 print.mixed_fit <-
   function (x, ...) {
@@ -67,7 +65,6 @@ print.mixed_fit <-
   }
 
 
-##' @export print.mixed_fit_summary
 ##' @method print mixed_fit_summary
 print.mixed_fit_summary <-
   function (x, ...) {

@@ -17,9 +17,12 @@
 #' be used.
 #' @param tol Numeric; if log-likelihood increases by less that \code{tol} in
 #' one step, procedure stops.
+#' @param SEs logical: should standard errors be calculated?
 #' @param sparse Should sparse matrices be used?  Requires package
 #' \code{Matrix}.
 #' @param quietly Logical indicating whether output should be suppressed.
+#' @param use_optim should \code{optim} be used for fitting?
+#' 
 #' @return An object of class \code{mixed_fit}.  This is a list containing
 #' (amongst other things): \item{params}{An object of class \code{Mparams},
 #' containing the Moebius parameters which maximise the likelihood.}
@@ -29,7 +32,7 @@
 #' counts for marginal tables consisting of districts and their parents should
 #' be positive.  A warning will be produced if this is not so.
 #' @author Robin Evans, Ilya Shpitser
-#' @seealso \code{\link{summary_mixed_fit}} \code{\link{autoFit}}
+#' @seealso \code{\link{summary.mixed_fit}} \code{\link{autoFit}}
 #' @references Evans, R.J. and Richardson, T.S. (2010) - Fitting acyclic
 #' directed mixed graphs to binary data. \emph{UAI-10}.
 #' 
@@ -37,10 +40,10 @@
 #' @keywords graphs
 #' @examples
 #' 
-#' data(gss.small)
-#' data(gr1)
+#' data(gss_small)
+#' data(gr1, package="MixedGraphs")
 #' 
-#' out = fitADMG(gss.small, gr1)
+#' out = fitADMG(gss_small, gr1)
 #' summary(out)
 #' # not a good fit!
 #' 
@@ -85,7 +88,7 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
     if (isTRUE(any(dist.dat[[d]] == 0))) warning("Zero counts in sufficient statistics")
   }
 
-  # INITIAL TOLERANCE  FOR .doone
+  # INITIAL TOLERANCE FOR .doone
   tol2 = 1e-1
   move = 2*tol
 

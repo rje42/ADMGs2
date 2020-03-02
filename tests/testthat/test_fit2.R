@@ -10,3 +10,7 @@ dat <- cbind(dat, freq=rpois(4, 50))
 test_that("New sparser method works", {
   expect_equal(fitADMG(dat = dat, graph=dag20)$ll, -2807.874671787004)
 })
+
+#test_that("New sparser method works for autoFit", {
+#  expect_success(autoFit(dat = dat))
+#})
