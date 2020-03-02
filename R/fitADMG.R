@@ -27,7 +27,7 @@
 #' (amongst other things): \item{params}{An object of class \code{Mparams},
 #' containing the Moebius parameters which maximise the likelihood.}
 #' \item{ll}{Value of the log-likelihood at the maximum.}
-#' @note %% ~~further notes~~
+#' 
 #' @section Warning: For the algorithm to be guaranteed to work correctly, all
 #' counts for marginal tables consisting of districts and their parents should
 #' be positive.  A warning will be produced if this is not so.

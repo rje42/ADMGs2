@@ -1,18 +1,18 @@
 ## function that searches through ADMGs with simple edge manipulations
 .searchADMG <-
-  function(graph, dat, stat, criterion = "AIC", quietly = FALSE, r = TRUE, tol = 1e-2) {
+  function(graph, dat, stat, criterion = "AIC", quietly = FALSE, r = TRUE, tol = 1e-6) {
     n = length(graph$v)
     current.graph = graph
     current.stat = stat
     moved = FALSE
     
     for (i in seq_len(n-1)) for (j in seq_len(n-i)+i) {
-      if (!(j %in% anc(graph, i)) && !(i %in% pa(graph, j)) && !(i %in% sp(graph, j))) {
+      if (!(j %in% anc(graph, i)) && !(i %in% pa(graph, j)) && !(i %in% sib(graph, j))) {
         if (!quietly) cat(i,"-->",j,criterion,"= ")
         # try.graph = graph
         try.graph = addEdges(graph, list(directed=list(c(i,j))))
         # try.graph$edges$directed = c(graph$edges$directed, list(c(i,j)))
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -29,7 +29,7 @@
         # try.graph = graph
         # try.graph$edges$directed = setdiff(graph$edges$directed, list(c(i,j)))
         try.graph = removeEdges(graph, list(directed=list(c(i,j))))
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -42,12 +42,12 @@
         if (!quietly) cat("\n")
       }
       
-      if (!(i %in% anc(graph, j)) && !(j %in% pa(graph, i)) && !(j %in% sp(graph, i))) {
+      if (!(i %in% anc(graph, j)) && !(j %in% pa(graph, i)) && !(j %in% sib(graph, i))) {
         if (!quietly) cat(i,"<--",j,criterion,"= ")
         # try.graph = graph
         # try.graph$edges$directed = c(graph$edges$directed, list(c(j,i)))
       try.graph = addEdges(graph, list(directed=list(c(j,i))))
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -64,7 +64,7 @@
         # try.graph = graph
         # try.graph$edges$directed = setdiff(graph$edges$directed, list(c(j,i)))
         try.graph = removeEdges(graph, list(directed=list(c(j,i))))
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -78,13 +78,13 @@
       }
       
       
-      if (!(j %in% sp(graph, i)) && !(i %in% pa(graph, j)) && !(j %in% pa(graph, i))) {
+      if (!(j %in% sib(graph, i)) && !(i %in% pa(graph, j)) && !(j %in% pa(graph, i))) {
         if (!quietly) cat(i,"<->",j,criterion,"= ")
         # try.graph = graph
         # try.graph$edges$bidirected = c(graph$edges$bidirected, list(c(i,j)))
         try.graph = addEdges(graph, list(bidirected=list(c(i,j))))
         
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -96,13 +96,13 @@
         }
         if (!quietly) cat("\n")
       }
-      else if (j %in% sp(graph, i)) {
+      else if (j %in% sib(graph, i)) {
         if (!quietly) cat(i,"<|>",j,criterion,"= ")
         # try.graph = graph
         # try.graph$edges$bidirected = setdiff(graph$edges$bidirected, list(c(i,j), c(j,i)))
         try.graph = removeEdges(graph, list(directed=list(c(i,j))))
         
-        f1 = fitADMG(dat, try.graph, tol=tol, sparse=FALSE, quietly=TRUE, r = r)
+        f1 = fitADMG(dat, try.graph, tol=tol, sparse=TRUE, quietly=TRUE, r = r)
         try.stat = switch(criterion, AIC=summary(f1, fisher=FALSE)$AIC, BIC=summary(f1, fisher=FALSE)$BIC)
         
         if (!quietly) cat(try.stat)
@@ -136,7 +136,7 @@
     for (i in seq_len(n-1)) for (j in seq_len(n-i)+i) {
       
       # try adding a directed edge from i to j
-      if (!(j %in% anc(graph, i)) && !(i %in% pa(graph, j)) && !(i %in% sp(graph, j))) {
+      if (!(j %in% anc(graph, i)) && !(i %in% pa(graph, j)) && !(i %in% sib(graph, j))) {
         
         # try.graph = graph
         # try.graph$edges$directed = c(graph$edges$directed, list(c(i,j)))
@@ -159,7 +159,7 @@
       }
       
       # try adding a bidirected edge from i to j
-      if (!(i %in% pa(graph, j)) && !(i %in% sp(graph, j))) {
+      if (!(i %in% pa(graph, j)) && !(i %in% sib(graph, j))) {
         
         # try.graph = graph
         # try.graph$edges$bidirected = c(graph$edges$bidirected, list(c(i,j)))
@@ -208,7 +208,7 @@
       }
       
       # try replacing i <-> j with i -> j
-      if (!(j %in% anc(try.graph, i)) && !(i %in% pa(try.graph, j)) && !(i %in% sp(try.graph, j))) {
+      if (!(j %in% anc(try.graph, i)) && !(i %in% pa(try.graph, j)) && !(i %in% sib(try.graph, j))) {
         
         add.try.graph = try.graph
         
@@ -231,7 +231,7 @@
       }
       
       # try replacing i <-> j with j -> i
-      if (!(i %in% anc(try.graph, j)) && !(j %in% pa(try.graph, i)) && !(j %in% sp(try.graph, i))) {
+      if (!(i %in% anc(try.graph, j)) && !(j %in% pa(try.graph, i)) && !(j %in% sib(try.graph, i))) {
         
         add.try.graph = try.graph
         
@@ -299,7 +299,7 @@
       }
       
       # try replacing i -> j with j <- i
-      if (!(i %in% anc(try.graph, j)) && !(j %in% pa(try.graph, i)) && !(j %in% sp(try.graph, i))) {
+      if (!(i %in% anc(try.graph, j)) && !(j %in% pa(try.graph, i)) && !(j %in% sib(try.graph, i))) {
         
         add.try.graph = try.graph
         

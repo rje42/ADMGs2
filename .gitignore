@@ -6,3 +6,5 @@ ADMGs2.Rproj
 Rprof.out
 ._*
 inst/doc
+R/autoFit.R
+man/autoFit.Rd

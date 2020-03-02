@@ -179,17 +179,18 @@
 ##' 
 ##' @param graph ADMG
 ##' @param max_size largest set to consider
-##' @param sort if 1, returns unique sets, if 2 returns sorted sets
+##' @param sort if 1, returns unique sets, if 2 returns sorted sets, if 3 returns sets ordered reverse lexicographically
+##' @param r logical: use recursive heads? (Defaults to \code{FALSE})
 ##' 
 ##' @details This returns sets of the form \code{HuA}, where \code{A} is any 
 ##' subset of \code{tail(H)}.  This representation is shown to 
 ##' correspond precisely to ordinary Markov equivalence.
 ##' 
 ##' @export subsetRep
-subsetRep <- function (graph, max_size, sort=1) {
+subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   if (missing(max_size)) max_size <- length(graph$v)
   
-  ht <- MixedGraphs::headsTails(graph, r=FALSE, max_head = max_size, by_district = FALSE)
+  ht <- headsTails(graph, r=r, max_head = max_size, by_district = FALSE)
   
   out <- list()
   
@@ -200,6 +201,9 @@ subsetRep <- function (graph, max_size, sort=1) {
   }
   
   if (sort > 1) {
+    out <- lapply(out, sort.default)
+  }
+  if (sort > 2) {
     fn <- sapply(out, function(x) sum(2^(x-1)))
     if (any(duplicated(fn))) stop("There should not be a duplication, but something appears twice")
     out <- out[order(fn)]

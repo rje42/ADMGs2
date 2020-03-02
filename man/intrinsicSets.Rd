@@ -2,9 +2,12 @@
 % Please edit documentation in R/intrinsic.R
 \name{intrinsicSets}
 \alias{intrinsicSets}
+\alias{intrinsicSets2}
 \title{List Intrinsic Sets of Summary Graph or ADMG}
 \usage{
 intrinsicSets(graph, r = TRUE, by_district = FALSE, sort = 2, recall = FALSE)
+
+intrinsicSets2(graph, r = TRUE, by_district = FALSE, maxbarren, sort = 1)
 }
 \arguments{
 \item{graph}{object of class \code{mixedgraph}, must be an ADMG.}
@@ -16,6 +19,8 @@ intrinsicSets(graph, r = TRUE, by_district = FALSE, sort = 2, recall = FALSE)
 \item{sort}{should output be sorted/unique?}
 
 \item{recall}{logical: is this a recalling of the function (internal use only)}
+
+\item{maxbarren}{Maximum number of barren nodes (i.e. head size) to consider}
 }
 \description{
 List Intrinsic Sets of a Summary Graph or Acyclic Directed Mixed Graph, possibly by district.
@@ -29,3 +34,8 @@ and their dis-tails.
 
 \code{intrinsicClosure} returns an integer vector containing the closure of set.
 }
+\section{Functions}{
+\itemize{
+\item \code{intrinsicSets2}: Alternative method for non-recursive heads only
+}}
+

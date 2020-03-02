@@ -54,9 +54,6 @@ search.  Details in Evans and Richardson (2010).
 Recursive factorizations allow for modelling of Verma-constraints.  See
 Richardson et al (2012).
 }
-\note{
-%% ~~further notes~~
-}
 \section{Warning}{
  For the algorithm to be guaranteed to work correctly, all
 counts for marginal tables consisting of districts and their parents should

@@ -4,14 +4,16 @@
 \alias{subsetRep}
 \title{Get the subset representation of an ordinary ADMG}
 \usage{
-subsetRep(graph, max_size, sort = 1)
+subsetRep(graph, max_size, sort = 1, r = FALSE)
 }
 \arguments{
 \item{graph}{ADMG}
 
 \item{max_size}{largest set to consider}
 
-\item{sort}{if 1, returns unique sets, if 2 returns sorted sets}
+\item{sort}{if 1, returns unique sets, if 2 returns sorted sets, if 3 returns sets ordered reverse lexicographically}
+
+\item{r}{logical: use recursive heads? (Defaults to \code{FALSE})}
 }
 \description{
 Get the subset representation of an ordinary ADMG
