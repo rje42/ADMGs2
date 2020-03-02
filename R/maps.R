@@ -63,7 +63,7 @@ maps <-
     n = length(graph$v)
     # GET HEADS AND TAILS IF NECESSARY
     if (missing(head_list) || missing(tail_list)){
-      o <- headsTails(graph, r = r, byDist = TRUE)
+      o <- headsTails(graph, r = r, by_district = TRUE)
       head_list <- lapply(o, function(x) x$heads)
       tail_list <- lapply(o, function(x) x$tails)
     }
@@ -206,7 +206,7 @@ maps <-
 moebius <-
   function (graph, ptable, dims=rep(2,n), r=TRUE) {
     n <- length(graph$vnames)
-    ht = headsTails(graph, r = r, byDist = TRUE)
+    ht = headsTails(graph, r = r, by_district = TRUE)
     head_list <- lapply(ht, function(x) x$heads)
     tail_list <- lapply(ht, function(x) x$tails)
     
@@ -330,7 +330,7 @@ getMparamsNames <-
 #' @keywords array
 #' @examples
 #' 
-#' data(gr1)
+#' data(gr1, package="MixedGraphs")
 #' prob_table(gr1)
 #' 
 #' @export prob_table

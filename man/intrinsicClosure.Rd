@@ -4,12 +4,14 @@
 \alias{intrinsicClosure}
 \title{Find intrinsic closure of a connected set}
 \usage{
-intrinsicClosure(graph, set, sort = 1)
+intrinsicClosure(graph, set, r = TRUE, sort = 1)
 }
 \arguments{
 \item{graph}{object of class \code{mixedgraph}}
 
-\item{set}{set of vertices to find intrisic closure ot}
+\item{set}{set of vertices to find intrisic closure of}
+
+\item{r}{logical: should recursive heads be used?}
 
 \item{sort}{if sort > 1 then output is sorted}
 }

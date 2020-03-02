@@ -4,33 +4,53 @@
 ##' 
 ##' @param graph object of class \code{graph}, should be a CADMG
 ##' @param r logical indicating if recursive heads should be used
-##' @param byDist logical indicating if results should be returned separated by district
+##' @param by_district logical indicating if results should be returned separated by district
+##' @param sort should output be unique/sorted?
 ##' @param intrinsic optionally, a list of the relevant intrinsic sets of the ADMG
+##' @param max_head optional maximum size for each head
 ##' 
 ##' @details The result is a list containing elements of the 
 ##' same length named \code{heads}, \code{tails} and 
 ##' \code{intrinsic} giving the heads, tails and intrinsic sets.
-##' If \code{byDist} is \code{TRUE} then result is a list 
+##' If \code{by_district} is \code{TRUE} then result is a list 
 ##' each of which is of the above format, corresponding to the 
 ##' separate districts of \code{graph}.
 ##' 
 ##' @export headsTails
-headsTails = function (graph, r = TRUE, byDist = FALSE, intrinsic)
+headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, max_head)
 {
-  if (byDist) {
+  if (by_district) {
     if (missing(intrinsic)) {
       dists <- districts(graph)
       pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-      return(mapply(function(i,j) headsTails(fix(graph,j,i), r=r, byDist=FALSE), dists, pas, SIMPLIFY=FALSE))
+      out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
+      
+      if (missing(max_head)) return(out)
+      else {
+        for (i in seq_along(dists)) {
+          kp <- lengths(out[[i]]$heads) <= max_head
+          out[[i]]$heads <- out[[i]]$heads[kp]
+          out[[i]]$tails <- out[[i]]$tails[kp]
+        }
+        return(out)
+      }
     }
     else {
       dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
       pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-      return(mapply(function(i,j,k) headsTails(graph[i,j], r=r, byDist=FALSE, k), dists, pas, intrinsic, SIMPLIFY=FALSE))
+      out <- mapply(function(i,j,k) headsTails(graph[i,j], r=r, by_district=FALSE, k), dists, pas, intrinsic, SIMPLIFY=FALSE)
+
+      if (missing(max_head)) return(out)
+      else {
+        kp <- lengths(out$heads) <= max_head
+        out$heads <- out$heads[kp]
+        out$tails <- out$tails[kp]
+        return(out)
+      }
     }
   }
   
-  if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = r)
+  if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = r, sort=sort)
   
   if (r) {
     tail.list = lapply(intrinsic, function(v) pa(graph, v))
@@ -42,9 +62,81 @@ headsTails = function (graph, r = TRUE, byDist = FALSE, intrinsic)
     # for (j in seq_along(head.list)) tail.list[[j]] = setdiff(union(intrinsic[[j]], pa(graph, intrinsic[[j]])), head.list[[j]])
   }
   
+  if (!missing(max_head)) {
+    wh <- lengths(head.list) <= max_head
+    head.list <- head.list[wh]
+    tail.list <- tail.list[wh]
+  }
+  
+  if (sort > 1) {
+    head.list <- lapply(head.list, sort.int)
+    tail.list <- lapply(tail.list, sort.int)
+    intrinsic <- lapply(intrinsic, sort.int)
+  }
+  if (sort > 2) {
+    ord <- order(sapply(head.list, function(x) sum(2^(x-1))))
+    head.list <- head.list[ord]
+    tail.list <- tail.list[ord]
+    intrinsic <- intrinsic[ord]
+  }
+  
   out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
   out
 }
+
+
+# 
+# ##' Get list of heads and tails
+# ##' 
+# ##' @param graph a \code{mixedgraph} object
+# ##' @param r logical, should recursive heads be used?
+# ##' @param by_district logical, should these be grouped by district?
+# ##' @param set_list list of intrinsic sets
+# ##' @param max_head largest head size to consider (\code{r=FALSE} only)
+# ##' 
+# ##' @details Returns a list of heads and their corresponding tails.
+# ##' 
+# ##' @export headsTails
+# headsTails <- function (graph, r = TRUE, by_district = FALSE, set_list, max_head) 
+# {
+#   if(missing(set_list)) {
+#     if (missing(max_head)) set_list <- intrinsicSets(graph, r = r, by_district = by_district)
+#     else {
+#       if (r) stop("Function does not support maximizing the size of recursive heads")
+#       set_list <- intrinsicSets2(graph, r = r, by_district = by_district, maxbarren = max_head)
+#     }
+#   }
+#   
+#   if (by_district) {
+#     head.list = tail.list = list()
+#     for (i in seq_along(set_list)) {
+#       if (r) {
+#         tail.list[[i]] = lapply(set_list[[i]], function(v) pa(graph, v))
+#         head.list[[i]] <- mapply(setdiff, set_list[[i]], tail.list[[i]], SIMPLIFY=FALSE)
+#       }
+#       else {
+#         head.list[[i]] = lapply(set_list[[i]], function(v) barren(graph, v))
+#         tail.list[[i]] = list()
+#         for (j in seq_along(head.list[[i]]))  tail.list[[i]][[j]] = setdiff(union(set_list[[i]][[j]], pa(graph, set_list[[i]][[j]])), head.list[[i]][[j]])
+#       }
+#     }
+#   }
+#   else {
+#     if (r) {
+#       tail.list = lapply(set_list, function(v) pa(graph, v))
+#       head.list <- mapply(setdiff, set_list, tail.list, SIMPLIFY=FALSE)
+#     }
+#     else {
+#       head.list = lapply(set_list, function(v) barren(graph, v))
+#       tail.list = list()
+#       for (j in seq_along(head.list))  tail.list[[j]] = setdiff(union(set_list[[j]], pa(graph, set_list[[j]])), head.list[[j]])
+#     }
+#   }
+#   out <- list(heads = head.list, tails = tail.list)
+#   out
+# }
+# 
+
 
 ## Finds the set of all intrinsic sets of a CADMG
 ## 
@@ -239,14 +331,141 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
 # }  # instrinsicSets()
 
 
+#' @param maxbarren Maximum number of barren nodes (i.e. head size) to consider
+#' @describeIn intrinsicSets Alternative method for non-recursive heads only
+#' @export intrinsicSets2
+intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort=1) {
+  districts <- districts(graph)
+  
+  if (missing(maxbarren)) maxbarren = max(graph$v)
+  out <- list()
+  
+  if(!is.ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
+  
+  subs <- anSets2(graph, maxbarren = maxbarren, same_dist = TRUE)
+  if (by_district) d <- sapply(subs, function(x) subsetmatch(x[1], districts))
+  
+  if(r) {
+    # stop("function does not work for recursive heads")
+    
+    out <- lapply(graph$v, function(set) intrinsicClosure(graph, set, r=TRUE))
+    n <- length(out)
+    vnam <- sapply(out, paste, collapse="")
+    liv <- rep(TRUE, n)
+    liv[lengths(liv) >= maxbarren] <- FALSE
+    
+    bid <- matrix(0, n, n)
+    for (i in seq_len(n)[-1]) for (j in seq_len(i-1)) bid[i,j] <- bid[j,i] <- 1*any(sib(graph, out[[i]]) %in% out[[j]])
+    sub <- matrix(0, n, n)
+    for (i in seq_len(n)[-1]) for (j in seq_len(i-1)) sub[j,i] <- 1*is.subset(out[[j]],out[[i]])
+    
+    edges <- list(directed=sub, bidirected=bid)
+    
+    graph2 <- mixedgraph(v=seq_len(n), edges=edges, vnames=vnam)
+    new <- any(bidi > 0)
+    
+    while (new) {
+      new <- FALSE
+      bidi <- which(graph2$edges$bidirected > 0 & upper.tri(graph2$edges$bidirected))
+      for (i in seq_len(nrow(bidi))) {
+        if (liv[bidi[i,1]] && liv[bidi[i,2]]) {
+          out[[n+1]] <- intrinsicClosure(graph, c(out[[bidi[i,1]]], out[[bidi[i,2]]]))
+          graph2 <- MixedGraphs:::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+          n <- n+1
+          
+          for (j in seq_len(n-1)) {
+            graph2$edges$directed[j,n] <- 1*is.subset(out[[j]],out[[n]])
+            graph2$edges$directed[n,j] <- 1*is.subset(out[[n]],out[[j]])
+          }
+          
+          new <- TRUE
+        }
+        
+        if (any(liv[dec(graph2, out[[bidi[i,1]]])]) && 
+            any(liv[dec(graph2, out[[bidi[i,2]]])])) {
+          
+          for (j in dec(graph2, out[[bidi[i,1]]])) for (k in dec(graph2, out[[bidi[i,2]]])) {
+            
+            
+            if (j == 1 && k == 1) next
+            
+            out[[n+1]] <- intrinsicClosure(graph, c(out[[j]], out[[k]]))
+            graph2 <- MixedGraphs:::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+            n <- n+1
+            liv[n] <- TRUE
+            
+            for (j in seq_len(n-1)) {
+              graph2$edges$directed[j,n] <- 1*is.subset(out[[j]], out[[n]])
+              graph2$edges$directed[n,j] <- 1*is.subset(out[[n]], out[[j]])
+            }
+            
+            new <- TRUE
+            
+          }
+        }
+        
+        graph2 <- removeEdges(graph2, list(bidirected=list(bidi[i,])))
+      }
+    }
+    
+    stop("function does not work for recursive heads")
+    
+    ### insert work here
+    
+  } # if (r)
+  else {
+    # subs = powerSet(dis, maxbarren)[-1]
+    int = logical(length(subs))
+    
+    # FOR EACH SUBSET C OF A DISTRICT, CHECK IF IT'S 'INTRINSIC'
+    for (j in seq_along(subs)) {
+      # ang IS G_{an C}, SUBGRAPH FORMED BY ANCESTORS OF subs[[j]]
+      bar <- barren(graph, subs[[j]])
+      dist <- dis(graph[subs[[j]]], bar[1])
+      dist2 <- dis(graph[subs[[j]]], bar)
+      if (setequal(dist2, dist)) {
+        out <- c(out, list(dist))
+        int[j] = TRUE
+      }
+      else int[j] = FALSE
+      
+      # 
+      # ang = graph[anc(graph, subs[[j]])]
+      # # DISTRICT OF C in ang.
+      # subdis = dis(ang, subs[[j]])
+      # 
+      # # SET C IS INTRINSIC IF IS MAXIMALLY <-> CONNECTED IN G_{an C}
+      # if (length(subdis) > length(subs[[j]])) int[j] = FALSE # NOT MAXIMAL
+      # else if(!all(subs[[j]] %in% dis(ang, subs[[j]][1]))) int[j] = FALSE # NOT CONNECTED
+      # else int[j] = TRUE # OK
+    }
+  }
+  
+  # out <- subs[int]
+  
+  if(by_district){
+    out <- tapply(out, INDEX = d[int], FUN=list)
+    names(out) <- NULL
+    
+    if (sort > 1) out <- rapply(out, sort.int, how="list")
+  } 
+  else if (sort > 1) {
+    out <- lapply(out, sort.int)
+  }
+  
+  out
+}
+
+
 ##' Find intrinsic closure of a connected set
 ##' 
 ##' @param graph object of class \code{mixedgraph}
-##' @param set set of vertices to find intrisic closure ot
+##' @param set set of vertices to find intrisic closure of
+##' @param r logical: should recursive heads be used?
 ##' @param sort if sort > 1 then output is sorted
 ##' 
 ##' @export intrinsicClosure
-intrinsicClosure = function(graph, set, sort=1) {
+intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
   #  districts <- districts(graph)
   if (length(set) == 0) return(integer(0))
   if (is(graph, "CADMG") && any(graph$vtype[set] == "fixed")) stop("Not a bidirected connected set of random vertices")
@@ -254,6 +473,15 @@ intrinsicClosure = function(graph, set, sort=1) {
   if (!all(set %in% dist)) stop("Not a bidirected connected set of random vertices")
   
   tmp = graph[dist]
+  
+  if (!r) {
+    ancs <- anc(graph, set)
+    S <- dis(graph[ancs], set, sort=sort)
+    if (length(districts(graph[S])) <= 1) return(S)
+    else stop("Not contained in a single 'intrinsic' set")
+  }
+  
+  
   continue = TRUE
   
   while (continue) {
@@ -267,6 +495,48 @@ intrinsicClosure = function(graph, set, sort=1) {
   if (sort > 1) out = sort.int(out)
   return(out)
 }
+
+
+# ##' @describeIn intrinsicSets Get the intrinsic closure of a set
+# ##' @param set set to find intrinsic closure of
+# ##' @export intrinsicClosure
+# intrinsicClosure <- function(graph, set, r=TRUE, sort=1) {
+#   
+#   if (length(set) == 0) return(integer(0))
+#   
+#   subgraph <- graph
+#   new = TRUE
+#   ans <- graph$v
+#   
+#   if (!r) {
+#     ancs <- anc(graph, set)
+#     S <- dis(graph[ancs], set, sort=sort)
+#     if (length(districts(graph[S])) <= 1) return(S)
+#     else stop("Not contained in a single intrinsic set")
+#   }
+# 
+#   while (new) {
+#     new = FALSE
+#     dists <- districts(subgraph)
+#     
+#     wh <- subsetmatch(list(set[1]), dists)
+#     if (all(set %in% dists[[wh]])) {
+#       subgraph <- subgraph[dists[[wh]]]
+#     }
+#     else stop("Not contained in a single intrinsic set")
+#     
+#     ans <- anc(subgraph, set)
+#       
+#     if (setequal(ans, subgraph$v)) break
+#     else {
+#       subgraph <- subgraph[ans]
+#       new = TRUE
+#     }
+#   }
+#   
+#   return(subgraph$v)
+#   # stop("Error in intrinsicClosure - perhaps 'set' not contained in a single district?")
+# }
 
 
 ##' @describeIn factorize Return the partition function for a particular set of vertices
@@ -319,6 +589,50 @@ factorize = function(graph, v = graph$v, r = TRUE, ht, head_order) {
     tail.list <- ht$tails[wh]
   }
   out = list(heads = head.list, tails = tail.list, vnames=graph$vnames)
+  return(out)
+}
+
+##' Gives partition/factorization
+##' 
+##' Uses order for speed
+##' returns integer value of heads from provided list
+##' 
+##' @param graph object of class \code{mixedgraph}
+##' @param heads list of heads 
+##' @param v set of vertices to partition
+##' @param r logical: should recursive parameterization be used?
+##' @param head.order numeric vector in same order as heads
+##' 
+##' @export partition0
+partition0 = function(graph, heads, v = seq_len(graph$n), r=TRUE, head.order) {
+  
+  wh = rep.int(TRUE, length(heads))
+  out = numeric(0)
+  
+  while (length(v) > 0) {
+    wh2 = fsapply(heads[wh], function(x) is.subset(x,v))
+    wh[wh] = wh[wh] & wh2
+    maxval = max(head.order[wh])
+    new = which(wh & head.order==maxval)
+    out = c(out, new)
+    v = setdiff(v, unlist(heads[new]))
+  }
+  
+  return(out)
+}
+
+##' @describeIn partition0 Give factorization of heads and tails
+##' @param ht list of heads and tails
+##' @export factorize0
+factorize0 = function (graph, v = seq_len(n), r = TRUE, ht, head.order) {
+  n = graph$n
+  if (length(v) == 0) {
+    return(numeric(0))
+  }
+  else {
+    out <- partition0(graph, ht$heads, v, r = r, head.order=head.order)
+  }
+  
   return(out)
 }
 

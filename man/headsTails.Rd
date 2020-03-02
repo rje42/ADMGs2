@@ -4,16 +4,20 @@
 \alias{headsTails}
 \title{Find heads and tails}
 \usage{
-headsTails(graph, r = TRUE, byDist = FALSE, intrinsic)
+headsTails(graph, r = TRUE, by_district = FALSE, sort = 1, intrinsic, max_head)
 }
 \arguments{
 \item{graph}{object of class \code{graph}, should be a CADMG}
 
 \item{r}{logical indicating if recursive heads should be used}
 
-\item{byDist}{logical indicating if results should be returned separated by district}
+\item{by_district}{logical indicating if results should be returned separated by district}
+
+\item{sort}{should output be unique/sorted?}
 
 \item{intrinsic}{optionally, a list of the relevant intrinsic sets of the ADMG}
+
+\item{max_head}{optional maximum size for each head}
 }
 \description{
 Lists the (recursive) heads and tails for a CADMG
@@ -22,7 +26,7 @@ Lists the (recursive) heads and tails for a CADMG
 The result is a list containing elements of the 
 same length named \code{heads}, \code{tails} and 
 \code{intrinsic} giving the heads, tails and intrinsic sets.
-If \code{byDist} is \code{TRUE} then result is a list 
+If \code{by_district} is \code{TRUE} then result is a list 
 each of which is of the above format, corresponding to the 
 separate districts of \code{graph}.
 }

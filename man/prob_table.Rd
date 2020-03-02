@@ -23,7 +23,7 @@ Put joint probabilities in an array with labelled dimensions.
 }
 \examples{
 
-data(gr1)
+data(gr1, package="MixedGraphs")
 prob_table(gr1)
 
 }

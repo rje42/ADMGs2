@@ -45,7 +45,7 @@ in the recursive parametrization unless all variables are independent.
 
 \examples{
 
-data(gr2)
+data(gr2, package="MixedGraphs")
 
 # Distribution of complete independence
 ptable = array(1/32, rep(2,5))
