@@ -5,10 +5,10 @@ package.
 
 Current features:
 
+* Models for ADMGs including intrinsic sets, heads and tails.
+
 * Fitting of graphs to contingency table.
 
-* Basic search procedure via `autoFit()`, using AIC or BIC.
-  
 To install the package, run the commands
 ```
 install.packages("devtools")
