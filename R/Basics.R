@@ -1,18 +1,3 @@
-##' @import rje
-##' @import MixedGraphs
-##' 
-##' @importFrom methods is
-##' @importFrom utils relist
-##' @importFrom stats rbeta
-##' @importFrom stats optim
-##' @importFrom numDeriv hessian
-##' 
-## @importFrom rje combinations
-## @importFrom rje quickSort
-## @importFrom rje is.subset
-## @importFrom rje powerSet
-## @importFrom rje subsetmatch
-
 graphOptionsEnv <- MixedGraphs:::graphOptionsEnv
 
 ## List of vertex types, which can be expanded [not currently supported]
@@ -29,6 +14,7 @@ assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
 ##' @details Prints a CADMG nicely onto the standard output
 ##' 
 ##' @method print CADMG
+##' 
 print.CADMG = function(x, ...) {
   w = x$v[x$vtypes=="fixed"]
   v = x$v[x$vtypes=="random"]

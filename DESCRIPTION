@@ -6,9 +6,9 @@ Authors@R: c(
   person("Ilya", "Shpitser", , "ilyas@cs.jhu.edu", role = c("aut")))
 Description: Functions for manipulating and fitting models with discrete 
              mixed graphs. 
-Depends: R (>= 3.1.2)
-Imports: MixedGraphs,
-         Matrix,
+Depends: R (>= 3.1.2),
+         MixedGraphs,
+Imports: Matrix,
          methods,
          numDeriv,
          rje,

@@ -53,7 +53,6 @@ headOrder <- function(h1, h2, graph) {
   return(0)
 }
 
-##' @importFrom Matrix Matrix
 ## NOT TESTED AND PERHAPS VERY INEFFICIENT
 maps <- 
   function(graph, head_list, tail_list, dist_list, sparse = FALSE, dims = rep(2, n), r = TRUE) {

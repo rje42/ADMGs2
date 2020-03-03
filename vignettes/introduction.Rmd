@@ -1,0 +1,50 @@
+---
+title: "Introduction to ADMGs2"
+author: "Robin J. Evans"
+output: rmarkdown::html_vignette
+date:   "`r Sys.Date()`"
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message=FALSE, echo=2}
+library(ADMGs2)
+```
+
+# Basics
+
+`ADMGs2` is a package that expands `MixedGraphs` to allow for fixed vertices.  It also 
+includes functions to compute intrisic sets, (recursive) heads and tails, and to fit 
+models using the algorithm of Evans and Richardson (2010).  
+
+Loading it overrides the class of vertices to include a new `fixed` class. [But for some 
+reason it doesn't show up here...]
+```{r vertex_types, message=FALSE}
+library(ADMGs2)
+vertexTypes()
+```
+
+# Making Graphs
+
+We can create ADMGs using `graphCr()`:
+```{r create_graph}
+gr <- graphCr("1 -> 2 <-> 4 <- 3")
+```
+To create a CADMG, we just need to fix a vertex.
+```{r fix_node}
+fix(gr, 3)
+```
+
+
+## References
+
+Evans, R.J. and Richardson, T.S.  Maximum likelihood fitting of acyclic directed mixed graphs to binary data, _UAI-10_, 2010.
