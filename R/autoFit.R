@@ -12,7 +12,6 @@
 #' 
 #' @param dat Either an object of class \code{freq.table}, or a vector of
 #' counts in reverse lexicographical order.
-#' @param dims The number of categories for each variable.
 #' @param start Graph to start search procedure at; defaults to graph with no
 #' edges.
 #' @param criterion Criterion to minimize: either \code{"AIC"} or \code{"BIC"}.
@@ -51,7 +50,7 @@ function(dat, start=NULL, criterion = "AIC", quietly = FALSE, r = TRUE, search =
   # else if (!missing(dims)) n = length(dims)
   # else stop("Must provde dimensions of model")
     n <- ncol(dat)-1
-    dims = apply(dat, 2, function(x) max(x)+1)[seq_len(n)]
+    dims = apply(dat[,-(n+1)], 2, function(x) length(unique.default(x)))
   }
   # else if (is.vector(dat)) {
   #   dat = cbind(combinations(dims), dat)
@@ -68,7 +67,9 @@ function(dat, start=NULL, criterion = "AIC", quietly = FALSE, r = TRUE, search =
   else graph = start
 
   best_fit = fitADMG(dat, graph, tol=tol, quietly=TRUE, sparse=TRUE, r = r)
-  stat = switch(criterion, AIC=summary(best_fit, fisher=FALSE)$AIC, BIC=summary(best_fit, fisher=FALSE)$BIC)
+  stat = switch(criterion, 
+                AIC=summary(best_fit, fisher=FALSE)$AIC, 
+                BIC=summary(best_fit, fisher=FALSE)$BIC)
 
 #  tmp = searchADMG(emptygraph, gss, summary(f)$AIC)
 
@@ -77,9 +78,9 @@ function(dat, start=NULL, criterion = "AIC", quietly = FALSE, r = TRUE, search =
   while(ok) {
 
   tmp = switch(search,  
-                basic = .searchADMG(best_fit$graph, dat, stat, criterion = criterion, quietly=quietly, tol=tol),
-                full = .searchADMG2(best_fit$graph, dat, stat, criterion = criterion, quietly=quietly, tol=tol),
-                exhaustive = stop("not implemented"))
+               basic = .searchADMG(best_fit$graph, dat, stat, criterion = criterion, quietly=quietly, tol=tol),
+               full = .searchADMG2(best_fit$graph, dat, stat, criterion = criterion, quietly=quietly, tol=tol),
+               exhaustive = stop("not implemented"))
 
     ok = tmp$moved
     if (ok) {

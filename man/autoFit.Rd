@@ -30,8 +30,6 @@ edges.}
 \item{search}{\code{"full"} or \code{"basic"} search.}
 
 \item{tol}{tolerance used to assess convergence in \code{\link{fitADMG}}.}
-
-\item{dims}{The number of categories for each variable.}
 }
 \value{
 An object of class \code{mixed_fit}.
