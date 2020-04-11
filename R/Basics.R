@@ -13,8 +13,7 @@ assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
 ##' 
 ##' @details Prints a CADMG nicely onto the standard output
 ##' 
-##' @method print CADMG
-##' 
+##' @export
 print.CADMG = function(x, ...) {
   w = x$v[x$vtypes=="fixed"]
   v = x$v[x$vtypes=="random"]
@@ -106,6 +105,7 @@ fix = function(graph, w, v) {
 ##' 
 ##' @param graph a \code{mixedgraph} that is also a \code{CADMG}
 ##' 
+##' @export
 random = function(graph) {
   if (is(graph, "CADMG")) {
     return(graph$v[(graph$vtypes == "random")])
@@ -114,6 +114,7 @@ random = function(graph) {
 }
 
 ##' @describeIn random get fixed nodes
+##' @export
 fixed = function(graph) {
   if (is(graph, "CADMG")) {
     return(graph$v[(graph$vtypes == "fixed")])

@@ -20,7 +20,7 @@
 #' directed mixed graphs to binary data. \emph{UAI-10}.
 #' @keywords graphs
 #' 
-#' @method summary mixed_fit
+#' @export
 summary.mixed_fit <-
 function (object, fisher=TRUE, ...) {
   q = object$params$q
@@ -51,7 +51,7 @@ function (object, fisher=TRUE, ...) {
 }
 
 
-##' @method print mixed_fit
+##' @export
 print.mixed_fit <-
   function (x, ...) {
     q = x$params$q
@@ -65,7 +65,7 @@ print.mixed_fit <-
   }
 
 
-##' @method print mixed_fit_summary
+##' @export
 print.mixed_fit_summary <-
   function (x, ...) {
     cat("Acyclic Directed Mixed Graph fit to discrete data\n")

@@ -69,19 +69,61 @@ aridProj <- function (graph, maximal=TRUE) {
 }
 
 
-##' Check if a graph is arid
-##' 
-##' @param graph ADMG of class \code{mixedgraph}
-##' 
+##' @describeIn is_MArG check if a graph is arid
 is_arid <- function(graph){
   
-  w <- c(ch(graph, graph$v), sib(graph, graph$v))
-  vs <- unique.default(w)
-    
+  if (!is.SG(graph)) return(FALSE)
+  vs <- intersect(ch(graph, graph$v), sib(graph, graph$v))
+
   ## if intrinsic closure contains more than v, then not arid
   if (length(vs) > 0) for (v in vs) {
     if (length(intrinsicClosure(graph, v)) > 1) return(FALSE)
   }
   
+  return(TRUE)
+}
+
+##' @describeIn is_MArG check if graph is maximal
+is_maximal <- function(graph, check=TRUE) {
+  
+  if (check) {
+    if (!is.SG(graph)) {
+      return(FALSE)
+    }
+    if (!is_arid(graph)) return(FALSE)
+  }
+  
+  ## go through districts looking for missing bidirected edges
+  dis <- districts(graph)
+  for (d in seq_along(dis)) {
+    v <- dis[[d]]
+    k <- 1
+    for (i in v[-1]) {
+      k <- k+1
+      for (j in setdiff(v[seq_len(k-1)], adj(graph, i))) {
+        ## look at pairs of non-adjacent vertices
+        intClo <- intrinsicClosure(graph, c(i, j))
+        if (j %in% dis(graph[intClo], i)) return(FALSE)
+      }
+    }
+  }
+  
+  return(TRUE)
+}
+
+
+##' Check if a graph is maximal and arid
+##' 
+##' @param graph summary graph or ADMG of class \code{mixedgraph}
+##' 
+##' @details Checks if the graph is both maximal and arid
+##' using the functions \code{is_arid} and \code{is_maximal}.
+##' 
+##' @export
+is_MArG <- function(graph) {
+  
+  if(!is_arid(graph)) return(FALSE)
+  if(!is_maximal(graph, check=FALSE)) return(FALSE)
+
   return(TRUE)
 }

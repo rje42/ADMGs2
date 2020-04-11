@@ -197,7 +197,8 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   
   out <- list()
   districts <- districts(graph[random(graph)])
-  if (by_district) return(lapply(districts, function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
+  if (by_district) return(lapply(districts, 
+                                 function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
   
   districts <- districts(graph[random(graph)])
   out <- list()
@@ -263,7 +264,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
         out[[i]] <- subs[int]
       }
       else out = c(out, subs[int])
-    }
+    } # else [!r]
   }
   
   ## clean up and finish
@@ -273,6 +274,11 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
     out <- lapply(out, sort.int)
     out <- unique.default(out)
   }
+  if (sort > 2) {
+    ord <- order(sapply(out, function(x) sum(2^(x-1))))
+    out <- out[ord]
+  }
+  
   out
 }
 
@@ -370,7 +376,7 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
       for (i in seq_len(nrow(bidi))) {
         if (liv[bidi[i,1]] && liv[bidi[i,2]]) {
           out[[n+1]] <- intrinsicClosure(graph, c(out[[bidi[i,1]]], out[[bidi[i,2]]]))
-          graph2 <- MixedGraphs:::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+          graph2 <- MixedGraphs::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
           n <- n+1
           
           for (j in seq_len(n-1)) {
@@ -390,7 +396,7 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
             if (j == 1 && k == 1) next
             
             out[[n+1]] <- intrinsicClosure(graph, c(out[[j]], out[[k]]))
-            graph2 <- MixedGraphs:::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+            graph2 <- MixedGraphs::addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
             n <- n+1
             liv[n] <- TRUE
             

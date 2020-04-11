@@ -1,4 +1,4 @@
-##' @method print mparam
+##' @export
 print.mparam <-
   function(x, blanks=FALSE, ...) {
     names = getMparamsNames(x, blanks=blanks)

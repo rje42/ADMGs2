@@ -29,7 +29,6 @@ models using the algorithm of Evans and Richardson (2010).
 Loading it overrides the class of vertices to include a new `fixed` class. [But for some 
 reason it doesn't show up here...]
 ```{r vertex_types, message=FALSE}
-library(ADMGs2)
 vertexTypes()
 ```
 
