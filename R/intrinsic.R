@@ -19,36 +19,52 @@
 ##' @export headsTails
 headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, max_head)
 {
-  if (by_district) {
-    if (missing(intrinsic)) {
-      dists <- districts(graph)
-      pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-      out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
-      
-      if (missing(max_head)) return(out)
-      else {
-        for (i in seq_along(dists)) {
-          kp <- lengths(out[[i]]$heads) <= max_head
-          out[[i]]$heads <- out[[i]]$heads[kp]
-          out[[i]]$tails <- out[[i]]$tails[kp]
+  if (by_district && r) {
+      if (missing(intrinsic)) {
+        dists <- districts(graph)
+        pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
+        out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
+        
+        
+        if (missing(max_head)) return(out)
+        else {
+          for (i in seq_along(dists)) {
+            kp <- lengths(out[[i]]$heads) <= max_head
+            out[[i]]$heads <- out[[i]]$heads[kp]
+            out[[i]]$tails <- out[[i]]$tails[kp]
+          }
+          return(out)
         }
-        return(out)
       }
-    }
-    else {
-      dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
-      pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-      out <- mapply(function(i,j,k) headsTails(graph[i,j], r=r, by_district=FALSE, k), dists, pas, intrinsic, SIMPLIFY=FALSE)
-
-      if (missing(max_head)) return(out)
       else {
-        kp <- lengths(out$heads) <= max_head
-        out$heads <- out$heads[kp]
-        out$tails <- out$tails[kp]
-        return(out)
+        dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
+        pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
+        out <- mapply(function(i,j,k) headsTails(graph[i,j], r=r, by_district=FALSE, intrinsic = k), 
+                      dists, pas, intrinsic, SIMPLIFY=FALSE)
+        
+        if (missing(max_head)) return(out)
+        else {
+          kp <- lengths(out$heads) <= max_head
+          out$heads <- out$heads[kp]
+          out$tails <- out$tails[kp]
+          return(out)
+        }
       }
-    }
   }
+  else if (by_district && !r) {
+    intrinsic <- intrinsicSets(graph, r=FALSE, by_district = TRUE)
+    
+    head.list = tail.list = list()
+    for (i in seq_along(intrinsic)) {
+      head.list[[i]] = lapply(intrinsic[[i]], function(v) barren(graph, v))
+      tail.list[[i]] = list()
+      for (j in seq_along(head.list[[i]])) tail.list[[i]][[j]] = setdiff(union(intrinsic[[i]][[j]], pa(graph, intrinsic[[i]][[j]])), head.list[[i]][[j]])
+    }
+    
+    out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
+    return(purrr::transpose(out))
+  }
+#  }
   
   if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = r, sort=sort)
   
@@ -197,7 +213,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   
   out <- list()
   districts <- districts(graph[random(graph)])
-  if (by_district) return(lapply(districts, 
+  if (by_district && r) return(lapply(districts, 
                                  function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
   
   districts <- districts(graph[random(graph)])
@@ -270,13 +286,21 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   ## clean up and finish
   out <- c(clq, out)
     
-  if (sort > 0) {
-    out <- lapply(out, sort.int)
-    out <- unique.default(out)
+  if (by_district) {
+    if (sort > 0) {
+      rapply(out, sort.int, how = "replace")
+      out <- lapply(out, unique.default)
+    }
   }
-  if (sort > 2) {
-    ord <- order(sapply(out, function(x) sum(2^(x-1))))
-    out <- out[ord]
+  else {
+    if (sort > 0) {
+      out <- lapply(out, sort.int)
+      out <- unique.default(out)
+    }
+    if (sort > 2) {
+      ord <- order(sapply(out, function(x) sum(2^(x-1))))
+      out <- out[ord]
+    }
   }
   
   out
