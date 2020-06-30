@@ -12,12 +12,13 @@
 ##' 
 aridProj <- function (graph, maximal=TRUE) {
   
+  n <- length(graph$vnames)
   intSets <- intrinsicSets(graph)
   intSets_lens <- lengths(intSets)
   intClo <- list()
   
   ## start with existing directed edges
-  dir_adj <- dir_adj_out <- adjMatrix(graph$edges$directed, directed = TRUE)
+  dir_adj <- dir_adj_out <- adjMatrix(graph$edges$directed, n=n, directed = TRUE)
   
   ## start by getting intrinsic closure of each vertex
   for (v in graph$v) {
@@ -35,9 +36,11 @@ aridProj <- function (graph, maximal=TRUE) {
   }
   
   ## fill in bidirected edges not replaced by directed edges
-  bi_adj <- bi_adj_out <- adjMatrix(graph$edges$bidirected)
+  bi_adj <- bi_adj_out <- adjMatrix(graph$edges$bidirected, n=n)
   bi_adj_out[dir_adj_out > 0 | t(dir_adj_out > 0)] = 0
  
+  if (maximal) dists <- districts(graph)
+  
   ## go through all possible edges to see if bidirected
   ## edge should be added...
   ## start by getting intrinsic closure of each vertex
@@ -54,12 +57,15 @@ aridProj <- function (graph, maximal=TRUE) {
     }
     
     ## if we want a maximal graph, check if <v,w> is bidirected connected
-    if (bi_adj_out[v,w] == 0 && maximal) {
-      if (length(districts(graph[intrinsicClosure(graph, c(v,w))])) == 1) {
-        bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
+    if (maximal) {
+      if (subsetmatch(list(c(v,w)), dists, nomatch = 0) > 0) {
+        if (bi_adj_out[v,w] == 0) {
+          if (length(districts(graph[intrinsicClosure(graph, c(v,w))])) == 1) {
+            bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
+          }
+        }
       }
     }
-    
   }
 
   ## construct a graph with the new edges

@@ -52,7 +52,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
       }
   }
   else if (by_district && !r) {
-    intrinsic <- intrinsicSets(graph, r=FALSE, by_district = TRUE)
+    if (missing(max_head)) intrinsic <- intrinsicSets(graph, r=FALSE, by_district = TRUE)
+    else intrinsic <- intrinsicSets2(graph, r=FALSE, by_district = TRUE, maxbarren = max_head)
     
     head.list = tail.list = list()
     for (i in seq_along(intrinsic)) {
@@ -66,7 +67,11 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   }
 #  }
   
-  if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = r, sort=sort)
+  if (missing(intrinsic) && !r) {
+    if (missing(max_head)) intrinsic <- intrinsicSets(graph, r = FALSE, sort=sort)
+    else intrinsic <- intrinsicSets2(graph, r = FALSE, sort=sort, maxbarren = max_head)
+  }
+  else if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = TRUE, sort=sort)
   
   if (r) {
     tail.list = lapply(intrinsic, function(v) pa(graph, v))
@@ -392,7 +397,7 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
     edges <- list(directed=sub, bidirected=bid)
     
     graph2 <- mixedgraph(v=seq_len(n), edges=edges, vnames=vnam)
-    new <- any(bidi > 0)
+    new <- any(bid > 0)
     
     while (new) {
       new <- FALSE
@@ -493,16 +498,18 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
 ##' @param set set of vertices to find intrisic closure of
 ##' @param r logical: should recursive heads be used?
 ##' @param sort if sort > 1 then output is sorted
+##' @param prev logical: should previous intrinsic set be given?
 ##' 
 ##' @export intrinsicClosure
-intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
+intrinsicClosure = function(graph, set, r=TRUE, sort=1, prev=FALSE) {
   #  districts <- districts(graph)
   if (length(set) == 0) return(integer(0))
   if (is(graph, "CADMG") && any(graph$vtype[set] == "fixed")) stop("Not a bidirected connected set of random vertices")
   dist = dis(graph, v=set[1])
   if (!all(set %in% dist)) stop("Not a bidirected connected set of random vertices")
   
-  tmp = graph[dist]
+  prev_set <- tmp2 <- graph$v
+  tmp <- graph
   
   if (!r) {
     ancs <- anc(graph, set)
@@ -510,19 +517,23 @@ intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
     if (length(districts(graph[S])) <= 1) return(S)
     else stop("Not contained in a single 'intrinsic' set")
   }
-  
-  
+
   continue = TRUE
-  
-  while (continue) {
-    nv = length(tmp$v)
-    tmp = tmp[anc(tmp, set)]
-    tmp = tmp[dis(tmp, set)]
-    if (length(tmp$v) == nv) break
+
+  if (length(tmp$v) > length(set)) {
+    while (continue) {
+      prev_set <- tmp2
+      tmp2 <- tmp$v
+      nv = length(tmp2)
+      tmp = tmp[anc(tmp, set)]
+      tmp = tmp[dis(tmp, set)]
+      if (length(tmp$v) == nv) break
+    }
   }
   out = tmp$v
   
   if (sort > 1) out = sort.int(out)
+  if (prev) attr(out, "prev") <- prev_set
   return(out)
 }
 
@@ -571,7 +582,7 @@ intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
 
 ##' @describeIn factorize Return the partition function for a particular set of vertices
 ## @export partition
-partition = function(graph, v = graph$v, r=TRUE, ht, head_order){
+partition = function(graph, v = graph$v, r=TRUE, ht, head_order) {
   
   if(length(v) == 0) return(list())
   else if (length(v) == 1) return(list(v))

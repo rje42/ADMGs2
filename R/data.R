@@ -51,3 +51,22 @@
 ##'
 ##' @source Unknown.
 "caesarian"
+
+##' Sewell and Shah Dataset
+##'
+##' A dataset on educational aspirations
+##'
+##' @format This is a \code{data.frame} object, with the following
+##' variables:
+##' \describe{
+##'   \item{Sex}{0=female, 1=male}
+##'   \item{Iq}{IQ, rated from 0 to 3}
+##'   \item{Cp}{Indicator of college plans}
+##'   \item{Pe}{Indicator of parental encouragement}
+##'   \item{Ses}{Socio-economic status, from 0 to 3}
+##' }
+##'
+##' @source Sewell, W. H., & Shah, V. P. (1968). Social class, parental encouragement, and educational aspirations. \emph{American Journal of Sociology}, 73(5), 559-572.
+##' @seealso \url{https://doi.org/10.1086/224530}
+"educ_asp"
+
