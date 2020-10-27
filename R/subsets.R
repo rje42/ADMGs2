@@ -175,9 +175,12 @@
 #   return(S)
 # }
 
-##' Get the subset representation of an ordinary ADMG
+##' Get the subset representation of an ADMG or summary graph
 ##' 
-##' @param graph ADMG
+##' For any ADMG or summary graph, returns the subset representation given 
+##' in Hu and Evans (2020).
+##' 
+##' @param graph ADMG or summary graph
 ##' @param max_size largest set to consider
 ##' @param sort if 1, returns unique sets, if 2 returns sorted sets, if 3 returns sets ordered reverse lexicographically
 ##' @param r logical: use recursive heads? (Defaults to \code{FALSE})
@@ -190,16 +193,32 @@
 subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   if (missing(max_size)) max_size <- length(graph$v)
   
-  ht <- headsTails(graph, r=r, max_head = max_size, by_district = FALSE)
+  if (!is.SG(graph)) stop("Graph should be a summary graph")
   
-  out <- list()
+  if (nedge(graph, "undirected") > 0) {
+    und_part <- graph[etype="undirected"]
+    graph <- graph[etype=c("directed", "bidirected")]
+    
+    clq <- cliques(und_part)
+    out <- list()
+    for (i in seq_along(clq)) out <- c(out, powerSet(clq[[i]], m=max_size))
+    out <- out[lengths(out) > 1]
+    if (sort > 0) {
+      fn <- sapply(out, function(x) sum(2^(x-1)))
+      out[!duplicated(fn)]
+    }
+  }
+  else out <- list()
+  
+  ht <- headsTails(graph, r=r, max_head = max_size, by_district = FALSE)
   
   for (i in seq_along(ht$heads)) {
     ps <- powerSet(ht$tails[[i]], m=max_size-length(ht$heads[[i]]))
     tmp <- lapply(ps, function(x) c(ht$heads[[i]], x))
     out <- c(out, c(tmp))
   }
-  
+
+  ## implement required level of sorting
   if (sort > 1) {
     out <- lapply(out, sort.default)
   }
