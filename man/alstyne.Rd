@@ -4,7 +4,8 @@
 \name{alstyne}
 \alias{alstyne}
 \title{van Alstyne and Gottfredson Data}
-\format{This is a \code{data.frame} object, with the following
+\format{
+This is a \code{data.frame} object, with the following
 variables:
 \describe{
   \item{person}{Was this a crime against a person?}
@@ -14,7 +15,8 @@ variables:
   \item{success}{Was the parolee successful in avoiding arrest for further offences?}
   \item{prior}{Was there a previous sentence for this offence?}
   \item{freq}{The total number of individuals in this row}
-}}
+}
+}
 \source{
 van Alstyne and Gottfredson, A Multidimensional Contingency Table Analysis of Parole Outcome: New Methods and Old Problems in Criminological Prediction,
 \emph{J. Res. Crime and Deliquency}, 1978.

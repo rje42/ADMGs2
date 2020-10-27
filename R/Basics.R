@@ -2,6 +2,7 @@ graphOptionsEnv <- MixedGraphs:::graphOptionsEnv
 
 ## List of vertex types, which can be expanded [not currently supported]
 ## type     : character name of vertex type
+## hidden   : logical for whether vertex is unobserved
 assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
                                    hidden=c(FALSE, FALSE)), 
        envir=graphOptionsEnv)
@@ -15,8 +16,8 @@ assign("vertexTypesDF", data.frame(type=c("random", "fixed"),
 ##' 
 ##' @export
 print.CADMG = function(x, ...) {
-  w = x$v[x$vtypes=="fixed"]
-  v = x$v[x$vtypes=="random"]
+  w = x$v[na.omit(x$vtypes=="fixed")]
+  v = x$v[na.omit(x$vtypes=="random")]
   nv = length(v)
   nw = length(w)
   cat("CADMG with ", nv, ifelse(nv == 1, " random vertex", " random vertices"),
@@ -62,6 +63,40 @@ print.CADMG = function(x, ...) {
   invisible(x)
 }
 
+##' @export
+`[.CADMG` <- function(graph, v, ..., drop=FALSE) {
+  v <- unique.default(sort.int(v))
+  
+  gr_out <- as.mixedgraph(graph)[v, drop=drop]
+  class(gr_out) <- c("CADMG", "mixedgraph")
+  
+  if (drop) gr_out$vtypes <- graph$vtypes[v]
+  else {
+    gr_out$vtypes <- graph$vtypes
+    if (length(v) > 0) gr_out$vtypes[-v] <- NA
+  }
+  
+  gr_out
+}
+
+##' @export
+as.mixedgraph <- function(graph) {
+  UseMethod("as.mixedgraph")
+}
+
+##' @export
+as.mixedgraph.default <- function(graph) {
+  convert(graph, format="mixedgraph")
+}
+
+##' @export
+as.mixedgraph.CADMG <- function(graph) {
+  class(graph) <- NULL
+  graph <- graph[c("v","edges","vnames")]
+  class(graph) <- "mixedgraph"
+  graph
+}
+
 ##' Fix a node in a CADMG
 ##' 
 ##' @param graph (C)ADMG object of class mixedgraph
@@ -72,12 +107,14 @@ print.CADMG = function(x, ...) {
 ##' fixing the vertices in \code{w}.
 ##' 
 ##' @export fix
-fix = function(graph, w, v) {
+fix <- function(graph, w, v) {
   if (missing(v)) v = setdiff(graph$v, w)
   else if (length(intersect(w,v))) stop("Fixed and random vertex sets must be disjoint")
   else graph = graph[c(w,v)]
   
-  if (any(!(c(w,v) %in% graph$v))) stop(paste("No node ", paste(setdiff(c(w,v), graph$v), sep=", "), " found", sep=""))
+  v_left <- sort.int(c(w,v))
+  
+  if (any(!(v_left %in% graph$v))) stop(paste("No node ", paste(setdiff(c(w,v), graph$v), sep=", "), " found", sep=""))
   
   graph <- withEdgeList(graph)
   
@@ -85,17 +122,21 @@ fix = function(graph, w, v) {
   if (length(e$directed)) {
     rmv = (matrix(unlist(e$directed), nrow=2)[2,] %in% w)
     e$directed = e$directed[!rmv]
+    class(e$directed) = "eList"
   }
   if (length(e$bidirected)) {
     bied = matrix(unlist(e$bidirected), nrow=2)
     rmvbi = (bied[1,] %in% w) | (bied[2,] %in% w)
     e$bidirected = e$bidirected[!rmvbi]
+    class(e$bidirected) = "eList"
   }
   if (length(e$undirected)) {
     stop("Only valid for CADMGs")
   }
-  vtype = rep("fixed", length(c(v,w)))
-  vtype[graph$v %in% v] = "random"
+  vtype <- rep(NA_character_, length(graph$vnames))
+  vtype[v_left][graph$v %in% v] <- "random"
+  vtype[v_left][graph$v %in% w] <- "fixed"
+
   out <- list(v=graph$v, edges=e, vnames=graph$vnames, vtypes=vtype)
   class(out) <- c("CADMG", "mixedgraph")
   out
@@ -106,20 +147,26 @@ fix = function(graph, w, v) {
 ##' @param graph a \code{mixedgraph} that is also a \code{CADMG}
 ##' 
 ##' @export
-random = function(graph) {
+random <- function(graph) {
   if (is(graph, "CADMG")) {
-    return(graph$v[(graph$vtypes == "random")])
+    out <- na.omit(which(graph$vtypes == "random"))
+    if (any(is.na(out))) stop("Failed to find random vertices")
+    return(out)
   }
-  else return(graph$v)
+  else if (is.mixedgraph(graph)) return(graph$v)
+  else stop("Not a valid object for random()")
 }
 
 ##' @describeIn random get fixed nodes
 ##' @export
-fixed = function(graph) {
+fixed <- function(graph) {
   if (is(graph, "CADMG")) {
-    return(graph$v[(graph$vtypes == "fixed")])
+    out <- na.omit(which(graph$vtypes == "fixed"))
+    if (any(is.na(out))) stop("Failed to find fixed vertices")
+    return(out)
   }
-  else return(integer(0))
+  else if (is.mixedgraph(graph)) return(integer(0))
+  else stop("Not a valid object for fixed()")
 }
 
 # ##' Compute non-recursive dis-tail

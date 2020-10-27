@@ -36,14 +36,25 @@ vertexTypes()
 
 We can create ADMGs using `graphCr()`:
 ```{r create_graph}
-gr <- graphCr("1 -> 2 <-> 4 <- 3")
+gr <- graphCr("1 -> 2 <-> 4 <- 3 <- 2")
+gr
 ```
 To create a CADMG, we just need to fix a vertex.
 ```{r fix_node}
 fix(gr, 3)
 ```
 
+# Fitting models to data
+
+We can use the `twins` data set as a toy example.
+```{r load_twins}
+data(twins)
+gr4 <- makeGraphCycle(4, type="bidirected")
+summary(fitADMG(twins, graph=gr4))
+```
 
 ## References
 
 Evans, R.J. and Richardson, T.S.  Maximum likelihood fitting of acyclic directed mixed graphs to binary data, _UAI-10_, 2010.
+
+Richardson, T.S. et al.  Nested Markov properties for acyclic directed mixed graphs, _arXiv:1701.06686_, 2017.

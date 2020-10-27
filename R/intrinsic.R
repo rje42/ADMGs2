@@ -221,7 +221,6 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   if (by_district && r) return(lapply(districts, 
                                  function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
   
-  districts <- districts(graph[random(graph)])
   out <- list()
   
   ## go along each district and find intrinsic sets
@@ -252,7 +251,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
         an_set_subgraph <- dis_subgraph[an_set]
         d <- districts(an_set_subgraph)
         
-        recursed_sets <- Recall(an_set_subgraph, r, FALSE, recall=TRUE)
+        recursed_sets <- Recall(an_set_subgraph, r=r, FALSE, recall=TRUE)
         
         ## add in new sets
         if(by_district){
@@ -498,19 +497,16 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
 ##' @param set set of vertices to find intrisic closure of
 ##' @param r logical: should recursive heads be used?
 ##' @param sort if sort > 1 then output is sorted
-##' @param prev logical: should previous intrinsic set be given?
 ##' 
 ##' @export intrinsicClosure
-intrinsicClosure = function(graph, set, r=TRUE, sort=1, prev=FALSE) {
+intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
   #  districts <- districts(graph)
   if (length(set) == 0) return(integer(0))
   if (is(graph, "CADMG") && any(graph$vtype[set] == "fixed")) stop("Not a bidirected connected set of random vertices")
   dist = dis(graph, v=set[1])
   if (!all(set %in% dist)) stop("Not a bidirected connected set of random vertices")
   
-  prev_set <- tmp2 <- graph$v
-  tmp <- graph
-  
+  ## non-recursive case
   if (!r) {
     ancs <- anc(graph, set)
     S <- dis(graph[ancs], set, sort=sort)
@@ -518,25 +514,101 @@ intrinsicClosure = function(graph, set, r=TRUE, sort=1, prev=FALSE) {
     else stop("Not contained in a single 'intrinsic' set")
   }
 
-  continue = TRUE
-
+  ## deal with recursive case
+  tmp2 <- graph$v
+  tmp <- graph[dist]
+  continue <- TRUE
+  
   if (length(tmp$v) > length(set)) {
     while (continue) {
-      prev_set <- tmp2
       tmp2 <- tmp$v
       nv = length(tmp2)
-      tmp = tmp[anc(tmp, set)]
       tmp = tmp[dis(tmp, set)]
+      tmp = tmp[anc(tmp, set)]
       if (length(tmp$v) == nv) break
     }
   }
   out = tmp$v
   
   if (sort > 1) out = sort.int(out)
-  if (prev) attr(out, "prev") <- prev_set
+
   return(out)
 }
 
+##' Get C^*
+##' 
+##' @param graph ADMG object of class \code{mixedgraph}
+##' @param C \code{intrinsic set}
+##' @param int optional list of intrinsic sets
+##' 
+##' @details Obtains largest intrinsic set of which the 
+##' intrinsic set \code{C} is an ancestral district.  If \code{C} is
+##' an ancestral district, then the code just returns 
+##' the vertices of \code{graph}.
+##' 
+##' @export
+ancDisClos <- function (graph, C, int) {
+  
+  ## deal with top level sets
+  tmp <- graph[anc(graph, C)]
+  tmp <- dis(tmp, C[1])
+  if (setequal(C, tmp)) return(graph$v)
+
+  ## otherwise, get a list of the intrinsic sets
+  if (missing(int)) int <- intrinsicSets(graph, sort = 3)
+
+  wh <- sapply(int, function(x) is.subset(C, x))
+  int <- int[wh]
+
+  int <- int[lengths(int) > length(C)]
+  out <- rep(FALSE, length(int))
+  
+  for (i in seq_along(int)) {
+    tmp <- graph[int[[i]]]
+    tmp <- tmp[anc(tmp, C)]
+    if (setequal(C, dis(tmp, C[1]))) out[i] <- TRUE
+    # if (setmatch(C, districts(graph), nomatch = 0) > 0) out[i] <- TRUE
+  }
+
+  int <- int[out]
+  kp <- list()
+  int <- int[order(sapply(int, function(x) sum(2^x)))]
+  
+  if (length(int) == 1) kp <- int
+  else if (length(int) > 1) {
+    while (length(int) > 1) {
+      kp <- c(kp, last(int))
+      int <- int[c(sapply(int[-length(int)], function(x) !is.subset(x, int[[length(int)]])), FALSE)]
+    }  
+  }  
+  else stop("No intrinisic sets containing C")
+  
+  Cstar <- Reduce(intersect, kp)
+  Cstar <- dis(graph[Cstar], C[1])
+  
+  # Cstar <- Reduce(union, int[out])
+  # if (setmatch(list(Cstar), c(int, list(graph$v)), nomatch = 0) == 0) stop("No unique maximal intrinsic set")
+  
+  # tmp <- graph[anc(graph, C)]
+  # tmp <- dis(tmp, C[1])
+  # if (setequal(C, tmp)) return(graph$v)
+  # if (is.subset(tmp, C)) stop("Not an intrinsic set")
+  # 
+  # Cstar <- integer(0)
+  # if (length(graph$v) == 0) return(integer(0))
+  # change <- TRUE
+  # 
+  # while (change) {
+  #   if (setequal(graph$v, Cstar)) stop("Not an intrinsic set")
+  #   graph <- graph[dis(graph, C)]
+  #   Cstar <- graph$v
+  #   graph <- graph[anc(graph, C)]
+  #   
+  #   if(setequal(C, graph$v)) break
+  # }
+
+  Cstar
+}
 
 # ##' @describeIn intrinsicSets Get the intrinsic closure of a set
 # ##' @param set set to find intrinsic closure of

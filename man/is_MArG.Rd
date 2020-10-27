@@ -8,7 +8,7 @@
 \usage{
 is_arid(graph)
 
-is_maximal(graph, check = TRUE)
+is_maximal(graph, check = TRUE, ancestral)
 
 is_MArG(graph)
 }

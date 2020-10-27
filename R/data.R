@@ -70,3 +70,8 @@
 ##' @seealso \url{https://doi.org/10.1086/224530}
 "educ_asp"
 
+##' Graph that often serves as a counter example
+##' 
+##' @format A mixed graph object that is also an ADMG.
+##' 
+"grCounter"

@@ -27,13 +27,20 @@ function (object, fisher=TRUE, ...) {
   p = length(unlist(q)) # i.e. the numbers of parameters
   n_obs = sum(object$dat)
   
+  
+  if (is.array(object$dat)) {
+    n_obs <- sum(object$dat)
+    ll.sat = sum(object$dat*log(object$dat/n_obs))
+  }
+  else {
+    n_obs <- sum(object$dat$freq)
+    ll.sat = sum(object$dat$freq*log(object$dat$freq/n_obs))
+  }
+  deviance = 2*(ll.sat - object$ll)
+
   AIC = 2*p - 2*object$ll
   BIC = log(n_obs)*p - 2*object$ll
-  
-  if (is.array(object$dat)) ll.sat = sum(object$dat*log(object$dat/n_obs))
-  else ll.sat = sum(object$dat$freq*log(object$dat$freq/n_obs))
-  deviance = 2*(ll.sat - object$ll)
-  
+    
   if (fisher) FIM = .fisher_mixed_fit(object)
   else FIM = NULL
   probs = probdist(object$params, object$maps)

@@ -92,9 +92,9 @@ rADMG <- function(n, N=1, p_dir=1/n, p_bi=1/n, list=FALSE, arid=FALSE) {
   return(out2)
 }
 
-
-getEdges <- function(n, nedge) {
-  nv <- c(0,cumsum(seq_len(n-1)))
-  
-  
-}
+# 
+# getEdges <- function(n, nedge) {
+#   nv <- c(0,cumsum(seq_len(n-1)))
+#   
+#   
+# }

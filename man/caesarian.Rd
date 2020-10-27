@@ -4,7 +4,8 @@
 \name{caesarian}
 \alias{caesarian}
 \title{Caesarian Dataset}
-\format{This is a \code{data.frame} object, with the following
+\format{
+This is a \code{data.frame} object, with the following
 variables:
 \describe{
   \item{cesarian}{Was a Caesarian section performed?}
@@ -13,7 +14,8 @@ variables:
   \item{breech}{Was the baby in the breech position?}
   \item{nullipar}{Is this a first birth?}
   \item{freq}{The total number of births in this row}
-}}
+}
+}
 \source{
 Unknown.
 }

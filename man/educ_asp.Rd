@@ -4,7 +4,8 @@
 \name{educ_asp}
 \alias{educ_asp}
 \title{Sewell and Shah Dataset}
-\format{This is a \code{data.frame} object, with the following
+\format{
+This is a \code{data.frame} object, with the following
 variables:
 \describe{
   \item{Sex}{0=female, 1=male}
@@ -12,7 +13,8 @@ variables:
   \item{Cp}{Indicator of college plans}
   \item{Pe}{Indicator of parental encouragement}
   \item{Ses}{Socio-economic status, from 0 to 3}
-}}
+}
+}
 \source{
 Sewell, W. H., & Shah, V. P. (1968). Social class, parental encouragement, and educational aspirations. \emph{American Journal of Sociology}, 73(5), 559-572.
 }

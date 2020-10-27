@@ -1,3 +1,4 @@
+.DS_Store
 ADMGs2.Rproj
 .Rproj.user
 .Rhistory
@@ -8,3 +9,4 @@ Rprof.out
 inst/doc
 R/autoFit.R
 man/autoFit.Rd
+scratch/

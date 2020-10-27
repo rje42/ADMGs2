@@ -90,7 +90,7 @@ is_arid <- function(graph){
 }
 
 ##' @describeIn is_MArG check if graph is maximal
-is_maximal <- function(graph, check=TRUE) {
+is_maximal <- function(graph, check=TRUE, ancestral) {
   
   if (check) {
     if (!is.SG(graph)) {
@@ -99,17 +99,35 @@ is_maximal <- function(graph, check=TRUE) {
     if (!is_arid(graph)) return(FALSE)
   }
   
+  if (missing(ancestral)) ancestral <- is_ancestral(graph)
+    
   ## go through districts looking for missing bidirected edges
   dis <- districts(graph)
-  for (d in seq_along(dis)) {
-    v <- dis[[d]]
-    k <- 1
-    for (i in v[-1]) {
-      k <- k+1
-      for (j in setdiff(v[seq_len(k-1)], adj(graph, i))) {
-        ## look at pairs of non-adjacent vertices
-        intClo <- intrinsicClosure(graph, c(i, j))
-        if (j %in% dis(graph[intClo], i)) return(FALSE)
+  dis <- dis[lengths(dis) > 2]
+  
+  if (ancestral) {
+    for (d in seq_along(dis)) {
+      v <- dis[[d]]
+      for (i in seq_along(v)[-1]) {
+        for (j in setdiff(v[seq_len(i-1)], adj(graph, v[i]))) {
+          ## look at pairs of non-adjacent vertices
+          con_comp <- dis(graph[anc(graph, v[c(i,j)])], v[i])
+          if (v[j] %in% con_comp) return(FALSE)
+        }
+      }
+    }
+  }
+  else {
+    for (d in seq_along(dis)) {
+      v <- dis[[d]]
+      k <- 1
+      for (i in v[-1]) {
+        k <- k+1
+        for (j in setdiff(v[seq_len(k-1)], adj(graph, i))) {
+          ## look at pairs of non-adjacent vertices
+          intClo <- intrinsicClosure(graph, c(i, j))
+          if (j %in% dis(graph[intClo], i)) return(FALSE)
+        }
       }
     }
   }
@@ -132,4 +150,53 @@ is_MArG <- function(graph) {
   if(!is_maximal(graph, check=FALSE)) return(FALSE)
 
   return(TRUE)
+}
+
+##' Check if a directed mixed graph is ancestral
+##' 
+##' @param graph object of class \code{mixedgraph}
+##' 
+##' @details \code{graph} should only contain directed and
+##' bidirected edges.
+is_ancestral <- function(graph) {
+  
+  ## check no arrows point to an undirected edge
+  un_g <- un(graph)
+  if (length(un_g) > 0) {
+    check_un <- any(ch(graph, graph$v) %in% un_g) || any(sib(graph, graph$v) %in% un_g)
+    if (check_un) return(FALSE)
+  }
+  
+  ## if graph is cyclic, return FALSE, otherwise get topological order
+  vs <- tryCatch(topologicalOrder(graph), error = function(e) {
+    if (geterrmessage() == "Graph is cyclic") return(NA)
+    e
+    })
+  if (is.na(vs[1])) return(FALSE)
+
+  
+  ## now check for siblings amongst ancestors
+  ancs <- vector(mode="list", length=length(vnames(graph)))
+  
+  for (v in vs) {
+    ancs[[v]] <- c(v, unlist(ancs[pa(graph, v)]))
+    if (any(sib(graph, v) %in% ancs[[v]])) return(FALSE)
+  }
+  
+  return(TRUE)
+}
+
+
+##' Check if a graph is maximal and ancestral
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' 
+##' @details Runs \code{is_ancestral} and then 
+##' \code{is_maximal}, reports the success of both 
+##' or the failure of either.
+##' 
+is_MAG <- function(graph) {
+  ancestral <- is_ancestral(graph)
+  if (!ancestral) return(FALSE)
+  else return(is_maximal(graph, check=FALSE, ancestral=ancestral))
 }

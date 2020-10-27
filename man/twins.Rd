@@ -6,7 +6,13 @@
 \alias{gss}
 \alias{gss_small}
 \title{Data Sets}
-\format{These are all \code{data.frame} objects.}
+\format{
+These are all \code{data.frame} objects.
+
+An object of class \code{data.frame} with 128 rows and 8 columns.
+
+An object of class \code{data.frame} with 16 rows and 5 columns.
+}
 \usage{
 twins
 
