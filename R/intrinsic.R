@@ -19,9 +19,16 @@
 ##' @export headsTails
 headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, max_head)
 {
+  if (length(un(graph)) > 0) gr2 <- graph[-un(graph)]
+  else gr2 <- graph
+  
+  ## if no vertices left, return empty lists
+  if (nv(gr2) == 0) return(list(heads=list(), tails=list(), intrinsic=list()))
+  
+  ## otherwise continue
   if (by_district && r) {
       if (missing(intrinsic)) {
-        dists <- districts(graph)
+        dists <- districts(gr2)
         pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
         out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
         
@@ -52,8 +59,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
       }
   }
   else if (by_district && !r) {
-    if (missing(max_head)) intrinsic <- intrinsicSets(graph, r=FALSE, by_district = TRUE)
-    else intrinsic <- intrinsicSets2(graph, r=FALSE, by_district = TRUE, maxbarren = max_head)
+    if (missing(max_head)) intrinsic <- intrinsicSets(gr2, r=FALSE, by_district = TRUE)
+    else intrinsic <- intrinsicSets2(gr2, r=FALSE, by_district = TRUE, maxbarren = max_head)
     
     head.list = tail.list = list()
     for (i in seq_along(intrinsic)) {
@@ -68,10 +75,10 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
 #  }
   
   if (missing(intrinsic) && !r) {
-    if (missing(max_head)) intrinsic <- intrinsicSets(graph, r = FALSE, sort=sort)
-    else intrinsic <- intrinsicSets2(graph, r = FALSE, sort=sort, maxbarren = max_head)
+    if (missing(max_head)) intrinsic <- intrinsicSets(gr2, r = FALSE, sort=sort)
+    else intrinsic <- intrinsicSets2(gr2, r = FALSE, sort=sort, maxbarren = max_head)
   }
-  else if (missing(intrinsic)) intrinsic <- intrinsicSets(graph, r = TRUE, sort=sort)
+  else if (missing(intrinsic)) intrinsic <- intrinsicSets(gr2, r = TRUE, sort=sort)
   
   if (r) {
     tail.list = lapply(intrinsic, function(v) pa(graph, v))
@@ -371,7 +378,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
 intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort=1) {
   districts <- districts(graph)
   
-  if (missing(maxbarren)) maxbarren = max(graph$v)
+  if (missing(maxbarren)) maxbarren = length(graph$v)
   out <- list()
   
   if(!is.ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
@@ -383,9 +390,9 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
     # stop("function does not work for recursive heads")
     
     out <- lapply(graph$v, function(set) intrinsicClosure(graph, set, r=TRUE))
-    n <- length(out)
+    n <- length(graph$vnames)
     vnam <- sapply(out, paste, collapse="")
-    liv <- rep(TRUE, n)
+    liv <- rep(TRUE, n)[graph$v]
     liv[lengths(liv) >= maxbarren] <- FALSE
     
     bid <- matrix(0, n, n)
