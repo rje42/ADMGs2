@@ -2,6 +2,7 @@
 ##' 
 ##' @param graph an ADMG as an object of class \code{mixedgraph}
 ##' @param maximal should the projection computed be maximal?
+##' @param verbose logical: should additional output be given?
 ##' 
 ##' @details Algorithm: compute the intrinsic closure of every 
 ##' vertex. Use this to obtain directed edges. Then add in bidirected
@@ -10,31 +11,40 @@
 ##' If maximal graph asked for, then also check intrinsic closures
 ##' of the pairs.
 ##' 
-aridProj <- function (graph, maximal=TRUE) {
+aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
   
   n <- length(graph$vnames)
-  intSets <- intrinsicSets(graph)
-  intSets_lens <- lengths(intSets)
-  intClo <- list()
+  # if (verbose) cat("Getting intrinsicSets()...")
+  # # intSets <- intrinsicSets(graph)
+  # if (verbose) cat("done\n")
+  # intSets_lens <- lengths(intSets)
+  intClo <- vector(mode="list", length=n)
+  intClo[graph$v] <- lapply(graph$v, function(x) intrinsicClosure(graph, x))
   
   ## start with existing directed edges
   dir_adj <- dir_adj_out <- adjMatrix(graph$edges$directed, n=n, directed = TRUE)
   
   ## start by getting intrinsic closure of each vertex
   for (v in graph$v) {
-    if (list(v) %in% intSets) {
-      ## if {v} is an intrinsic set then its own closure
-      intClo[[v]] <- v
-    }
-    else {
-      ## otherwise intrinsic closure is smallest 
-      ## intrinsic set containing v
-      wh <- sapply(intSets, function(x) v %in% x)
-      intClo[[v]] <- intSets[wh][[which.min(intSets_lens[wh])]]
-      dir_adj_out[,v] <- 1*(rowSums(dir_adj_out[,intClo[[v]],drop=FALSE]) > 0)
-    }
+    if (verbose) cat(v)
+    
+    dir_adj_out[intClo[[v]],v] <- 1L
+    
+    # if (list(v) %in% intSets) {
+    #   ## if {v} is an intrinsic set then its own closure
+    #   intClo[[v]] <- v
+    # }
+    # else {
+    #   ## otherwise intrinsic closure is smallest 
+    #   ## intrinsic set containing v
+    #   wh <- sapply(intSets, function(x) v %in% x)
+    #   intClo[[v]] <- intSets[wh][[which.min(intSets_lens[wh])]]
+    #   dir_adj_out[,v] <- 1*(rowSums(dir_adj_out[,intClo[[v]],drop=FALSE]) > 0)
+    # }
+    if (verbose) cat(" ")
   }
-  
+  if (verbose) cat("\n")
+
   ## fill in bidirected edges not replaced by directed edges
   bi_adj <- bi_adj_out <- adjMatrix(graph$edges$bidirected, n=n)
   bi_adj_out[dir_adj_out > 0 | t(dir_adj_out > 0)] = 0
@@ -44,7 +54,10 @@ aridProj <- function (graph, maximal=TRUE) {
   ## go through all possible edges to see if bidirected
   ## edge should be added...
   ## start by getting intrinsic closure of each vertex
+  if (verbose) cat("Looking at: ")
   for (v in graph$v) for (w in graph$v[graph$v < v]) {
+    if (verbose) cat(paste0("(", v, ",", w, ")\n"))
+    
     if (dir_adj_out[v,w] > 0 || dir_adj_out[w,v] > 0 || bi_adj_out[v,w] > 0) {
       next
     }

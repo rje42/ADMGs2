@@ -19,7 +19,8 @@
 ##' @export headsTails
 headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, max_head)
 {
-  if (length(un(graph)) > 0) gr2 <- graph[-un(graph)]
+  ung <- un(graph)
+  if (length(ung) > 0) gr2 <- graph[-ung]
   else gr2 <- graph
   
   ## if no vertices left, return empty lists
@@ -378,7 +379,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
 intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort=1) {
   districts <- districts(graph)
   
-  if (missing(maxbarren)) maxbarren = length(graph$v)
+  if (missing(maxbarren) || maxbarren > nv(graph)) maxbarren = nv(graph)
   out <- list()
   
   if(!is.ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
