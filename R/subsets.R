@@ -202,7 +202,7 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   }
 
   ## remove redundant entries if required 
-  if (sort > 2) {
+  if (sort > 0) {
     fn <- sapply(out, function(x) sum(2^(x-1)))
     if (any(duplicated(fn))) out <- out[!duplicated(fn)]
   }
