@@ -26,48 +26,53 @@ print.CADMG = function(x, ...) {
   cat("       and ", nw, ifelse(nw == 1, " fixed vertex ", " fixed vertices "),
       ifelse(nw == 0,"",":  "), sep="")
   cat(x$vnames[w], "\n\n", sep="  ")
-  
-  # get list of edge symbols
-  whEdge <- match(names(x$edges), edgeTypes()$type)
-  edgeSymb <- edgeTypes()$char
-  
-  for (i in seq_along(x$edges)) {
-    if (is.matrix(x$edges[[i]])) {
-      tmp <- cbind(row(x$edges)[x$edges > 0], col(x$edges)[x$edges > 0])
-      if(!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2]]
-      
-      for (j in seq_len(nrow(tmp))) {
-        cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
-            x$vnames[tmp[j,2]], "\n", sep=" ")
-      }
-      cat("\n")    
-    }
-    else if (is.data.frame(x$edges[[i]])) {
-      for (j in seq_len(nrow(x$edges[[i]]))) {
-        cat(x$vnames[x$edges[[i]][j,1]], edgeSymb[whEdge[i]],
-                     x$vnames[x$edges[[i]][j,2]], "\n", sep=" ")
-      }
-      cat("\n")
-    }      
-    else if (is.list(x$edges[[i]])) {
-      if (!is.null(x$edges[[i]]) && length(x$edges[[i]]) > 0) {
-        for (j in seq_along(x$edges[[i]])) {
-          cat(x$vnames[x$edges[[i]][[j]][1]], edgeSymb[whEdge[i]],
-              x$vnames[x$edges[[i]][[j]][2]], "\n", sep=" ")
-        }
-        cat("\n")
-      }
-    }
-  } 
-  
+
+  MixedGraphs:::print.edgeList(x$edges, x$vnames)
+  #   
+  # # get list of edge symbols
+  # whEdge <- match(names(x$edges), edgeTypes()$type)
+  # edgeSymb <- edgeTypes()$char
+  # 
+  # for (i in seq_along(x$edges)) {
+  #   if (is.matrix(x$edges[[i]])) {
+  #     tmp <- cbind(row(x$edges)[x$edges > 0], col(x$edges)[x$edges > 0])
+  #     if(!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2]]
+  #     
+  #     for (j in seq_len(nrow(tmp))) {
+  #       cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
+  #           x$vnames[tmp[j,2]], "\n", sep=" ")
+  #     }
+  #     cat("\n")    
+  #   }
+  #   else if (is.data.frame(x$edges[[i]])) {
+  #     for (j in seq_len(nrow(x$edges[[i]]))) {
+  #       cat(x$vnames[x$edges[[i]][j,1]], edgeSymb[whEdge[i]],
+  #                    x$vnames[x$edges[[i]][j,2]], "\n", sep=" ")
+  #     }
+  #     cat("\n")
+  #   }      
+  #   else if (is.list(x$edges[[i]])) {
+  #     if (!is.null(x$edges[[i]]) && length(x$edges[[i]]) > 0) {
+  #       for (j in seq_along(x$edges[[i]])) {
+  #         cat(x$vnames[x$edges[[i]][[j]][1]], edgeSymb[whEdge[i]],
+  #             x$vnames[x$edges[[i]][[j]][2]], "\n", sep=" ")
+  #       }
+  #       cat("\n")
+  #     }
+  #   }
+  # } 
+  # 
   invisible(x)
 }
 
 ##' @export
-`[.CADMG` <- function(graph, v, ..., drop=FALSE) {
-  v <- unique.default(sort.int(v))
+`[.CADMG` <- function(graph, v, ..., drop=FALSE, etype) {
+  ## 
+  if (missing(v)) v <- graph$v
+  else v <- unique.default(sort.int(v))
   
-  gr_out <- as.mixedgraph(graph)[v, drop=drop]
+  if (!missing(etype)) gr_out <- as.mixedgraph(graph)[v, drop=drop, etype=etype]
+  else gr_out <- as.mixedgraph(graph)[v, drop=drop]
   class(gr_out) <- c("CADMG", "mixedgraph")
   
   if (drop) gr_out$vtypes <- graph$vtypes[v]
@@ -108,6 +113,8 @@ as.mixedgraph.CADMG <- function(graph) {
 ##' 
 ##' @export fix
 fix <- function(graph, w, v) {
+  if (!is.ADMG(graph)) stop("Graph should be an ADMG")
+  
   if (missing(v)) v = setdiff(graph$v, w)
   else if (length(intersect(w,v))) stop("Fixed and random vertex sets must be disjoint")
   else graph = graph[c(w,v)]
@@ -116,28 +123,44 @@ fix <- function(graph, w, v) {
   
   if (any(!(v_left %in% graph$v))) stop(paste("No node ", paste(setdiff(c(w,v), graph$v), sep=", "), " found", sep=""))
   
-  graph <- withEdgeList(graph)
+  # graph <- withEdgeList(graph)
   
-  e = graph$edges
-  if (length(e$directed)) {
-    rmv = (matrix(unlist(e$directed), nrow=2)[2,] %in% w)
-    e$directed = e$directed[!rmv]
-    class(e$directed) = "eList"
-  }
-  if (length(e$bidirected)) {
-    bied = matrix(unlist(e$bidirected), nrow=2)
-    rmvbi = (bied[1,] %in% w) | (bied[2,] %in% w)
-    e$bidirected = e$bidirected[!rmvbi]
-    class(e$bidirected) = "eList"
-  }
-  if (length(e$undirected)) {
-    stop("Only valid for CADMGs")
-  }
-  vtype <- rep(NA_character_, length(graph$vnames))
-  vtype[v_left][graph$v %in% v] <- "random"
-  vtype[v_left][graph$v %in% w] <- "fixed"
+  graph <- mutilate(graph[v_left], w, etype="directed", -1L)
+  graph <- mutilate(graph, w, etype="bidirected", 0L)
+  
+  # e = graph$edges
+  # if (nedge(graph, "directed") > 0) {
+  #   
+  #   gr_d <- graph[, etype="directed"]
+  #   rmv = (matrix(unlist(e$directed), nrow=2)[2,] %in% w)
+  #   e$directed = e$directed[!rmv]
+  #   class(e$directed) = "eList"
+  #   removeEdges(graph, )
+  # }
+  # if (nedge(graph, "bidirected") > 0) {
+  #   bied = matrix(unlist(e$bidirected), nrow=2)
+  #   rmvbi = (bied[1,] %in% w) | (bied[2,] %in% w)
+  #   e$bidirected = e$bidirected[!rmvbi]
+  #   class(e$bidirected) = "eList"
+  # }
+  # if (nedge(graph, "undirected") > 0) {
+  #   stop("Only valid for CADMGs")
+  # }
 
-  out <- list(v=graph$v, edges=e, vnames=graph$vnames, vtypes=vtype)
+  vtype <- rep(NA_character_, length(graph$vnames))
+  
+  if (!is.null(graph$vtypes)) {
+    vtype[v_left][graph$vtypes[v_left] == "fixed" | graph$v %in% w] <- "fixed"
+    vtype[v_left][graph$vtypes[v_left] == "random" & graph$v %in% v] <- "random"
+  }
+  else {
+    vtype[v_left][graph$v %in% v] <- "random"
+    vtype[v_left][graph$v %in% w] <- "fixed"
+  }
+  
+  graph$vtypes <- vtype
+  
+  out <- list(v=v_left, edges=graph$edges, vnames=graph$vnames, vtypes=vtype)
   class(out) <- c("CADMG", "mixedgraph")
   out
 }
