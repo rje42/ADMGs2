@@ -2,6 +2,7 @@ admg0 <- mixedgraph(4)
 admg1 <- graphCr("1 -> 2 -> 4 <-> 3 <-> 2")
 admg2 <- makeGraphCycle(4, "bidirected")
 admg3 <- makeGraphComplete(4, "bidirected")
+admg4 <- graphCr("1 -- 2 -> 4 <-> 3 <-> 2")
 
 set.seed(1902)
 dat <- rpois(16, 50)
@@ -10,6 +11,7 @@ dim(dat) <- rep(2,4)
 test_that("fit is as expected", {
   expect_equal(fitADMG(dat, admg0)$ll, -2142.163400)
   expect_equal(fitADMG(dat, admg1)$ll, -2136.827979)
+  expect_equal(fitADMG(dat, admg1)$ll, fitADMG(dat, admg4)$ll)
 })
 
 fit2 <- fitADMG(dat, admg2)
