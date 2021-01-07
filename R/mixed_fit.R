@@ -24,7 +24,8 @@
 summary.mixed_fit <-
 function (object, fisher=TRUE, ...) {
   q = object$params$q
-  p = length(unlist(q)) # i.e. the numbers of parameters
+  p = object$p # i.e. the numbers of parameters
+  p0 = length(unlist(q)) # i.e. the numbers of parameters
   n_obs = sum(object$dat)
   
   
@@ -45,7 +46,7 @@ function (object, fisher=TRUE, ...) {
   else FIM = NULL
   probs = probdist(object$params, object$maps)
 
-  se.table = matrix(NA, ncol=2, nrow=p, dimnames = list(getMparamsNames(object$params), c("Estimate", "Std. Error")))
+  se.table = matrix(NA, ncol=2, nrow=p0, dimnames = list(getMparamsNames(object$params), c("Estimate", "Std. Error")))
   qvec = unlist(q)
   se.table[,1] = qvec
   if (!is.null(object$SEs)) se.table[,2] = object$SEs
@@ -56,7 +57,6 @@ function (object, fisher=TRUE, ...) {
   class(out) = "mixed_fit_summary"
   out
 }
-
 
 ##' @export
 print.mixed_fit <-

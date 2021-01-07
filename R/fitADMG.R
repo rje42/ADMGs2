@@ -79,7 +79,7 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
     
     if (length(U) == nv(graph)) return(out_ug)
   }
-  else out_ug <- list(ll=0)
+  else out_ug <- list(ll=0, p=0, df=0)
   
   graph <- graph[etype=c("directed", "bidirected")]
   graph <- fix(graph, U)
@@ -158,7 +158,8 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
   }
   
   out = list(params = params, ll = .logLik(dist.dat, params$q, maps0) + out_ug$ll, 
-             dat=dat, graph=graph, dim=dims, maps=maps0, r=r)
+             p = length(unlist(params$q)) + out_ug$p, dat=dat, graph=graph, 
+             dim=dims, maps=maps0, r=r)
   class(out) = "mixed_fit"
   
   if (SEs) {
@@ -179,7 +180,7 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
     if (!quietly) cat("\n")  
   }
   else out$SEs <- NULL
-
+  
   out
 }
 
