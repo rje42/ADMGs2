@@ -28,38 +28,49 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   
   ## otherwise continue
   if (by_district && r) {
-      if (missing(intrinsic)) {
-        dists <- districts(gr2)
-        pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-        out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
-        
-        
-        if (missing(max_head)) return(out)
-        else {
-          for (i in seq_along(dists)) {
-            kp <- lengths(out[[i]]$heads) <= max_head
-            out[[i]]$heads <- out[[i]]$heads[kp]
-            out[[i]]$tails <- out[[i]]$tails[kp]
-          }
-          return(out)
-        }
+    ## get dummy headTails list for undirected part
+    out2 <- list(list(heads = list(), tails=list(), intrinsic=list()))
+    out2 <- out2[rep(1, length(ung))]
+    
+    if (missing(intrinsic)) {
+      dists <- districts(gr2)
+      pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
+      out <- mapply(function(i,j) headsTails(fix(graph,j,i), r=r, by_district=FALSE), dists, pas, SIMPLIFY=FALSE)
+    }
+    else {
+      dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
+      pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
+      out <- mapply(function(i,j,k) headsTails(graph[i,j], r=r, by_district=FALSE, intrinsic = k), 
+                    dists, pas, intrinsic, SIMPLIFY=FALSE)
+      # 
+      # if (missing(max_head)) return(out)
+      # else {
+      #   kp <- lengths(out$heads) <= max_head
+      #   out$heads <- out$heads[kp]
+      #   out$tails <- out$tails[kp]
+      #   return(out)
+      # }
+    }  # if (missing(intrinsic))
+    
+    out <- c(out, out2)
+    
+    if (missing(max_head)) {
+      return(out)
+    }
+    else {
+      for (i in seq_along(dists)) {
+        kp <- lengths(out[[i]]$heads) <= max_head
+        out[[i]]$heads <- out[[i]]$heads[kp]
+        out[[i]]$tails <- out[[i]]$tails[kp]
       }
-      else {
-        dists <- lapply(intrinsic, function(x) unique.default(unlist(x)))
-        pas <- lapply(dists, function(x) MixedGraphs::adj(graph, x, etype="directed", dir=-1, inclusive=FALSE))
-        out <- mapply(function(i,j,k) headsTails(graph[i,j], r=r, by_district=FALSE, intrinsic = k), 
-                      dists, pas, intrinsic, SIMPLIFY=FALSE)
-        
-        if (missing(max_head)) return(out)
-        else {
-          kp <- lengths(out$heads) <= max_head
-          out$heads <- out$heads[kp]
-          out$tails <- out$tails[kp]
-          return(out)
-        }
-      }
+      return(out)
+    }
   }
   else if (by_district && !r) {
+    ## get dummy headTails list for undirected part
+    out2 <- list(list(heads = list(), tails=list(), intrinsic=list()))
+    out2 <- out2[rep(1, length(ung))]
+    
     if (missing(max_head)) intrinsic <- intrinsicSets(gr2, r=FALSE, by_district = TRUE)
     else intrinsic <- intrinsicSets2(gr2, r=FALSE, by_district = TRUE, maxbarren = max_head)
     
@@ -71,9 +82,10 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
     }
     
     out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
-    return(purrr::transpose(out))
+    out <- c(purrr::transpose(out), out2)
+    return(out)
   }
-#  }
+  #  }
   
   if (missing(intrinsic) && !r) {
     if (missing(max_head)) intrinsic <- intrinsicSets(gr2, r = FALSE, sort=sort)

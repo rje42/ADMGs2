@@ -243,6 +243,7 @@ fitUG <- function(dat, graph, tol = sqrt(.Machine$double.eps), SEs = TRUE,
   
   ### get formula
   clq <- cliques(graph)
+  clq <- lapply(clq, function(x) match(x, graph$v))
   # form <- paste0("~ ", paste(sapply(clq, function(x) 
   #   paste(names(dat)[x], collapse=":")), collapse=" + "))
   # form <- as.formula(form)
