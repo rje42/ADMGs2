@@ -59,7 +59,7 @@
   maps = fit$maps
 
   if (is.array(fit$dat)) freq = c(fit$dat)
-  else freq <- fit$dat$freq
+  else freq <- fit$dat[,ncol(fit$dat)]
   n_obs = sum(freq)
   probs = rep(1, prod(dim))
 

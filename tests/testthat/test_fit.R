@@ -26,11 +26,15 @@ test_that("fit is as expected 2", {
 })
 
 data(twins)
+twins2 <- twins
+names(twins2)[5] <- "count"
 fit30 <- fitADMG(twins, admg3)
 fit3 <- fitADMG(twins, admg2)
+fit3a <- fitADMG(twins2, admg2)
 
 test_that("fit is as expected 3", {
   expect_equal(2*(fit30$ll - fit3$ll), 28.8833252)
+  expect_equal(fit3[-4], fit3a[-4])  # check objects are treated the same regardless of name of variable
 })
 
 set.seed(1902)
