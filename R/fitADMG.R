@@ -207,7 +207,7 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
 #' @references Lauritzen (1996), Graphical Models, OUP.
 #' @keywords graphs
 #' 
-#' @import dmod
+#' @importFrom stats loglin
 #' @export
 fitUG <- function(dat, graph, tol = sqrt(.Machine$double.eps), SEs = TRUE, 
                   quietly = TRUE) {

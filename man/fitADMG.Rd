@@ -20,7 +20,7 @@ fitADMG(
 \item{dat}{The data, as an array of counts or a data frame whose final
 column contains the counts.}
 
-\item{graph}{An ADMG, as an object of class \code{graph}.}
+\item{graph}{An ADMG (or summary graph), as an object of class \code{graph}.}
 
 \item{r}{Logical indicating whether or not recursive factorizations should
 be used.}
@@ -45,7 +45,7 @@ containing the Moebius parameters which maximise the likelihood.}
 }
 \description{
 Fit discrete data to the Markov structure implied by an acyclic directed
-mixed graph.
+mixed graph or summary graph.
 }
 \details{
 Fits data using coordinate-wise block descent algorithm, with an Armijo line

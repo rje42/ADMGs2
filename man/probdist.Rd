@@ -4,12 +4,12 @@
 \alias{probdist}
 \title{Calculate joint probabilities.}
 \usage{
-probdist(moebius, maps, graph)
+probdist(moebius, map, graph)
 }
 \arguments{
 \item{moebius}{Object of class \code{mparam}.}
 
-\item{maps}{list containing maps for (use \code{maps}).}
+\item{map}{list containing maps for (use \code{maps}).}
 
 \item{graph}{if maps not supplied, an object of class \code{graph}; use to
 calculate maps.}

@@ -4,12 +4,14 @@
 \alias{aridProj}
 \title{Compute the (maximal) arid projection of a graph}
 \usage{
-aridProj(graph, maximal = TRUE)
+aridProj(graph, maximal = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{graph}{an ADMG as an object of class \code{mixedgraph}}
 
 \item{maximal}{should the projection computed be maximal?}
+
+\item{verbose}{logical: should additional output be given?}
 }
 \description{
 Compute the (maximal) arid projection of a graph

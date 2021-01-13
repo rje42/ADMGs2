@@ -4,15 +4,16 @@
 #' 
 #' @param graph an object of class graph
 #' @param dims integer vector of dimensions of distribution
-#' @param maps optionally, the output of \code{maps()}
+#' @param map optionally, the output of \code{maps()}
 #' @param r logical indicating whether or not recursive factorizations should
 #' be used
 #' @return Object of class \code{moebius} giving generalized Moebius parameters
 #' for a distribution in the model associated with \code{graph}.
 #' 
-#' @export rADMG
-rADMG <- function(graph, dims, maps, r=TRUE) {
-  if (missing(maps)) maps <- maps(graph, dims=dims, r=r)
+#' @export
+rADMGdist <- function(graph, dims, map, r=TRUE) {
+  if (missing(graph)) graph <- rADMG(n=length(dims))
+  if (missing(map)) map <- ADMGs2::map(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   ok <- FALSE
   gen <- function(x) {
@@ -22,7 +23,7 @@ rADMG <- function(graph, dims, maps, r=TRUE) {
   }
   while(!ok) {
     mobs2$q <- rapply(mobs$q, gen, how="replace")
-    if (all(probdist(mobs2, maps, graph) >= 0)) ok = TRUE
+    if (all(probdist(mobs2, map, graph) >= 0)) ok = TRUE
   }
   mobs2
 }
@@ -36,7 +37,7 @@ rADMG <- function(graph, dims, maps, r=TRUE) {
 #' 
 #' 
 #' @param moebius Object of class \code{mparam}.
-#' @param maps list containing maps for (use \code{maps}).
+#' @param map list containing maps for (use \code{maps}).
 #' @param graph if maps not supplied, an object of class \code{graph}; use to
 #' calculate maps.
 #' @return A numeric array of dimensions \code{moebius$dims} giving the joint
@@ -45,16 +46,16 @@ rADMG <- function(graph, dims, maps, r=TRUE) {
 #' @references Evans and Richardson.
 #' 
 probdist <-
-function(moebius, maps, graph) {
+function(moebius, map, graph) {
 
-  if (missing(maps)) maps = maps(graph, dims=moebius$dims, r=moebius$r)
-  probs = rep(1, prod(maps$dim))
+  if (missing(map)) map = maps(graph, dims=moebius$dims, r=moebius$r)
+  probs = rep(1, prod(map$dim))
   q = moebius$q
 
-  for (i in seq_along(maps$M)) {
-    tmp = as.vector(maps$M[[i]] %*% exp(maps$P[[i]] %*% log(unlist(q[[i]]))))
-    probs = probs*patternRepeat(tmp, maps$pa.dists[[i]], maps$dim)
+  for (i in seq_along(map$M)) {
+    tmp = as.vector(map$M[[i]] %*% exp(map$P[[i]] %*% log(unlist(q[[i]]))))
+    probs = probs*patternRepeat(tmp, map$pa.dists[[i]], map$dim)
   }
 
-  array(probs, maps$dim)
+  array(probs, map$dim)
 }
