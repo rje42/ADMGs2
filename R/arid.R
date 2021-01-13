@@ -22,69 +22,90 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
   intClo <- vector(mode="list", length=n)
   intClo[graph$v] <- lapply(graph$v, function(x) intrinsicClosure(graph, x))
   
-  ## start with existing directed edges
-  dir_adj <- dir_adj_out <- adjMatrix(graph$edges$directed, n=n, directed = TRUE)
+  gr_out <- graph[etype="directed"]
   
-  ## start by getting intrinsic closure of each vertex
-  for (v in graph$v) {
-    if (verbose) cat(v)
+  if (nedge(graph, "directed") > 0) {
+    ## start with existing directed edges
+    dir_adj <- dir_adj_out <- adjMatrix(graph$edges$directed, n=n, directed = TRUE)
     
-    dir_adj_out[intClo[[v]],v] <- 1L
+    ## start by getting intrinsic closure of each vertex
+    for (v in graph$v) {
+      # if (length(intClo[[v]]) == 1) next
+      
+      Pa_v <- pa(graph, intClo[[v]])
+      if (length(Pa_v) == 0) next
+      
+      dir_v <- lapply(Pa_v, function(x) c(x,v))
+      class(dir_v) <- "eList"
+      gr_out <- addEdges(gr_out, makeEdgeList(directed=dir_v))
+    }
+    # if (length(intClo[v]) > 1) {
+    #   if (verbose) cat(v)
+    #   
+    #   dir_adj_out[intClo[[v]],v] <- 1L
+    #   dir_adj_out[v,v] <- 0L
+    #   
+    #   # if (list(v) %in% intSets) {
+    #   #   ## if {v} is an intrinsic set then its own closure
+    #   #   intClo[[v]] <- v
+    #   # }
+    #   # else {
+    #   #   ## otherwise intrinsic closure is smallest 
+    #   #   ## intrinsic set containing v
+    #   #   wh <- sapply(intSets, function(x) v %in% x)
+    #   #   intClo[[v]] <- intSets[wh][[which.min(intSets_lens[wh])]]
+    #   #   dir_adj_out[,v] <- 1*(rowSums(dir_adj_out[,intClo[[v]],drop=FALSE]) > 0)
+    #   # }
+    #   if (verbose) cat(" ")
+    # }
+    # if (verbose) cat("\n")
     
-    # if (list(v) %in% intSets) {
-    #   ## if {v} is an intrinsic set then its own closure
-    #   intClo[[v]] <- v
-    # }
-    # else {
-    #   ## otherwise intrinsic closure is smallest 
-    #   ## intrinsic set containing v
-    #   wh <- sapply(intSets, function(x) v %in% x)
-    #   intClo[[v]] <- intSets[wh][[which.min(intSets_lens[wh])]]
-    #   dir_adj_out[,v] <- 1*(rowSums(dir_adj_out[,intClo[[v]],drop=FALSE]) > 0)
-    # }
-    if (verbose) cat(" ")
+    dir_adj_out <- withAdjMatrix(gr_out[etype="directed"])$edges$directed
   }
-  if (verbose) cat("\n")
-
-  ## fill in bidirected edges not replaced by directed edges
-  bi_adj <- bi_adj_out <- adjMatrix(graph$edges$bidirected, n=n)
-  bi_adj_out[dir_adj_out > 0 | t(dir_adj_out > 0)] = 0
- 
-  if (maximal) dists <- districts(graph)
+  else dir_adj_out <- adjMatrix(n)
   
-  ## go through all possible edges to see if bidirected
-  ## edge should be added...
-  ## start by getting intrinsic closure of each vertex
-  if (verbose) cat("Looking at: ")
-  for (v in graph$v) for (w in graph$v[graph$v < v]) {
-    if (verbose) cat(paste0("(", v, ",", w, ")\n"))
+  if (nedge(graph, "bidirected") > 0) {
+    ## fill in bidirected edges not replaced by directed edges
+    bi_adj <- bi_adj_out <- adjMatrix(graph$edges$bidirected, n=n)
+    bi_adj_out[dir_adj_out > 0 | t(dir_adj_out > 0)] = 0
     
-    if (dir_adj_out[v,w] > 0 || dir_adj_out[w,v] > 0 || bi_adj_out[v,w] > 0) {
-      next
-    }
+    if (maximal) dists <- districts(graph)
     
-    ## if intrinsic closures are joined by a bidirected edge,
-    ## then add in
-    if (any(bi_adj[intClo[[v]],intClo[[w]]] > 0)) {
-      bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
-      next
-    }
-    
-    ## if we want a maximal graph, check if <v,w> is bidirected connected
-    if (maximal) {
-      if (subsetmatch(list(c(v,w)), dists, nomatch = 0) > 0) {
-        if (bi_adj_out[v,w] == 0) {
-          if (length(districts(graph[intrinsicClosure(graph, c(v,w))])) == 1) {
-            bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
+    ## go through all possible edges to see if bidirected
+    ## edge should be added...
+    ## start by getting intrinsic closure of each vertex
+    if (verbose) cat("Looking at: ")
+    for (v in graph$v) for (w in graph$v[graph$v < v]) {
+      if (verbose) cat(paste0("(", v, ",", w, ")\n"))
+      
+      if (dir_adj_out[v,w] > 0 || dir_adj_out[w,v] > 0 || bi_adj_out[v,w] > 0) {
+        next
+      }
+      
+      ## if intrinsic closures are joined by a bidirected edge,
+      ## then add in
+      if (any(bi_adj[intClo[[v]],intClo[[w]]] > 0)) {
+        bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
+        next
+      }
+      
+      ## if we want a maximal graph, check if <v,w> is bidirected connected
+      if (maximal) {
+        if (subsetmatch(list(c(v,w)), dists, nomatch = 0) > 0) {
+          if (bi_adj_out[v,w] == 0) {
+            if (length(districts(graph[intrinsicClosure(graph, c(v,w))])) == 1) {
+              bi_adj_out[v,w] <- bi_adj_out[w,v] <- 1
+            }
           }
         }
       }
     }
   }
-
+  else bi_adj_out <- adjMatrix(n=n)
+    
   ## construct a graph with the new edges
   gr_out <- graph
-  gr_out$edges <- list(directed=dir_adj_out, bidirected=bi_adj_out)
+  gr_out$edges <- makeEdgeList(directed=dir_adj_out, bidirected=bi_adj_out)
   return(gr_out)
 }
 
