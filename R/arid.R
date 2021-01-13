@@ -11,6 +11,7 @@
 ##' If maximal graph asked for, then also check intrinsic closures
 ##' of the pairs.
 ##' 
+##' @export
 aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
   
   n <- length(graph$vnames)
@@ -89,6 +90,7 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
 
 
 ##' @describeIn is_MArG check if a graph is arid
+##' @export
 is_arid <- function(graph){
   
   if (!is.SG(graph)) return(FALSE)
@@ -103,6 +105,7 @@ is_arid <- function(graph){
 }
 
 ##' @describeIn is_MArG check if graph is maximal
+##' @export
 is_maximal <- function(graph, check=TRUE, ancestral) {
   
   if (check) {
@@ -171,6 +174,8 @@ is_MArG <- function(graph) {
 ##' 
 ##' @details \code{graph} should only contain directed and
 ##' bidirected edges.
+##' 
+##' @export
 is_ancestral <- function(graph) {
   
   ## check no arrows point to an undirected edge
@@ -208,6 +213,7 @@ is_ancestral <- function(graph) {
 ##' \code{is_maximal}, reports the success of both 
 ##' or the failure of either.
 ##' 
+##' @export
 is_MAG <- function(graph) {
   ancestral <- is_ancestral(graph)
   if (!ancestral) return(FALSE)
