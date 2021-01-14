@@ -7,13 +7,15 @@
 #' @param map optionally, the output of \code{maps()}
 #' @param r logical indicating whether or not recursive factorizations should
 #' be used
+#' @param alpha parameter to use in beta distribution
+#' 
 #' @return Object of class \code{moebius} giving generalized Moebius parameters
 #' for a distribution in the model associated with \code{graph}.
 #' 
 #' @export
 rADMGdist <- function(graph, dims, map, r=TRUE) {
   if (missing(graph)) graph <- rADMG(n=length(dims))
-  if (missing(map)) map <- ADMGs2::map(graph, dims=dims, r=r)
+  if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   ok <- FALSE
   gen <- function(x) {
@@ -45,10 +47,11 @@ rADMGdist <- function(graph, dims, map, r=TRUE) {
 #' @author Robin Evans
 #' @references Evans and Richardson.
 #' 
+#' @export
 probdist <-
 function(moebius, map, graph) {
 
-  if (missing(map)) map = maps(graph, dims=moebius$dims, r=moebius$r)
+  if (missing(map)) map = maps(graph, dims=moebius$dim, r=moebius$r)
   probs = rep(1, prod(map$dim))
   q = moebius$q
 

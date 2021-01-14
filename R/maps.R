@@ -58,8 +58,8 @@ maps <-
   function(graph, head_list, tail_list, dist_list, sparse = FALSE, dims = rep(2, n), r = TRUE) {
     
     if (sparse) requireNamespace("Matrix")
-    
     n = nv(graph)
+    
     # GET HEADS AND TAILS IF NECESSARY
     if (missing(head_list) || missing(tail_list)){
       o <- headsTails(graph, r = r, by_district = TRUE)
