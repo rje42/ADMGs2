@@ -13,7 +13,7 @@
 #' @export
 rADMGdist <- function(graph, dims, map, r=TRUE) {
   if (missing(graph)) graph <- rADMG(n=length(dims))
-  if (missing(map)) map <- ADMGs2::map(graph, dims=dims, r=r)
+  if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   ok <- FALSE
   gen <- function(x) {

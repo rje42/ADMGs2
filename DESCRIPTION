@@ -1,6 +1,6 @@
 Package: ADMGs2
 Title: Functions for Describing and Fitting Discrete Mixed Graphs
-Version: 0.4.006
+Version: 0.4.007
 Authors@R: c(
   person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre")),
   person("Ilya", "Shpitser", , "ilyas@cs.jhu.edu", role = c("aut")))
