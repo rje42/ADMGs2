@@ -4,7 +4,7 @@ author: "Robin J. Evans"
 output: rmarkdown::html_vignette
 date:   "`r Sys.Date()`"
 vignette: >
-  %\VignetteIndexEntry{introduction}
+  %\VignetteIndexEntry{Introduction to ADMGs2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

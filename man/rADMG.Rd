@@ -16,6 +16,8 @@ rADMG(n, N = 1, p_dir = 1/n, p_bi = 1/n, list = FALSE, arid = FALSE)
 \item{list}{logical: should output always be a list?}
 
 \item{arid}{logical: should graph be made to be arid?}
+
+\item{alpha}{parameter for generating numbers}
 }
 \description{
 Function to generate random graphs

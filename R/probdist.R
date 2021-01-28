@@ -13,13 +13,13 @@
 #' for a distribution in the model associated with \code{graph}.
 #' 
 #' @export
-rADMGdist <- function(graph, dims, map, r=TRUE) {
+rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
   if (missing(graph)) graph <- rADMG(n=length(dims))
   if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   ok <- FALSE
   gen <- function(x) {
-    out <- rbeta(length(x), 2*x, 2*(1-x))
+    out <- rbeta(length(x), 2*x*alpha, 2*(1-x)*alpha)
     dim(out) <- dim(x)
     out
   }

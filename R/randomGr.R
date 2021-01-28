@@ -3,6 +3,7 @@
 ##' @param n number of vertices
 ##' @param N number of graph to simulate
 ##' @param p_dir,p_bi probability of a directed/bidirected edge
+##' @param alpha parameter for generating numbers
 ##' @param list logical: should output always be a list?
 ##' @param arid logical: should graph be made to be arid?
 ##' 

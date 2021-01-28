@@ -4,7 +4,7 @@
 \alias{rADMGdist}
 \title{Generate a distribution from an ADMG model}
 \usage{
-rADMGdist(graph, dims, map, r = TRUE)
+rADMGdist(graph, dims, map, r = TRUE, alpha = 1)
 }
 \arguments{
 \item{graph}{an object of class graph}
@@ -15,6 +15,8 @@ rADMGdist(graph, dims, map, r = TRUE)
 
 \item{r}{logical indicating whether or not recursive factorizations should
 be used}
+
+\item{alpha}{parameter to use in beta distribution}
 }
 \value{
 Object of class \code{moebius} giving generalized Moebius parameters
