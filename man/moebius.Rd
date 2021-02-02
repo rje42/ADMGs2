@@ -47,7 +47,7 @@ in the recursive parametrization unless all variables are independent.
 
 data(gr2, package="MixedGraphs")
 
-# Distribution of complete independence
+# distribution of complete independence
 ptable = array(1/32, rep(2,5))
 moebius(gr2, ptable, r=TRUE)
 

@@ -7,27 +7,86 @@
 #' @param map optionally, the output of \code{maps()}
 #' @param r logical indicating whether or not recursive factorizations should
 #' be used
-#' @param alpha parameter to use in beta distribution
+#' @param alpha parameter to scale Beta distribution down by. 
+#' 
+#' @details The random distribution is
+#' obtained by starting with the uniform distribution, and adding an 
+#' independent (scaled) normal random variables to each Moebius parameter.  We 
+#' then scale the move to reach approximately the boundary of the simplex,
+#' and then pick a value between the uniform distribution and the boundary 
+#' point using a Beta distribution.  The parameter \code{alpha} being larger
+#' favours distributions closer to the uniform distribution.
 #' 
 #' @return Object of class \code{moebius} giving generalized Moebius parameters
-#' for a distribution in the model associated with \code{graph}.
+#' for a distribution in the model associated with \code{graph}.  
 #' 
 #' @export
 rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
   if (missing(graph)) graph <- rADMG(n=length(dims))
   if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
-  ok <- FALSE
-  gen <- function(x) {
-    out <- rbeta(length(x), 2*x*alpha, 2*(1-x)*alpha)
-    dim(out) <- dim(x)
-    out
+  
+  qs <- unlist(mobs$q)
+  
+  mv <- rnorm(length(qs), sd=qs/10)
+  if (any(qs + mv < 0)) {
+    message("Scaling down")
+    mv <- mv/(-min(mv/qs))+1e-10
   }
-  while(!ok) {
-    mobs2$q <- rapply(mobs$q, gen, how="replace")
-    if (all(probdist(mobs2, map, graph) >= 0)) ok = TRUE
+  mobs2$q <- relist(qs+mv, mobs$q)
+  
+  fact_d <- 1
+  fact_u <- 1
+  
+  ## if move unnecessarily small, then extend
+  while (all(probdist(mobs2, map, graph) >= 0)) {
+    fact_u <- fact_u*1.5
+    if (any(qs + fact_u*mv < 0)) {
+      fact_u <- fact_u/1.5
+      break
+    }
+    mobs2$q <- relist(qs+mv*fact_u, mobs$q)
   }
-  mobs2
+
+  ## if move too large, then contract
+  while (any(probdist(mobs2, map, graph) < 0)) {
+    fact_d <- fact_d*1.5
+    if (any(qs + mv/fact_d < 0)) {
+      fact_d <- fact_d/1.5
+      break
+    }
+    mobs2$q <- relist(qs+mv/fact_d, mobs$q)
+  }
+  
+  ## now scale with a beta to account for dimension
+  scal <- rbeta(1, length(qs)/alpha, 1)
+  mobs2$q <- relist(qs+mv*fact_u/fact_d*scal, mobs$q)
+  if (!all(probdist(mobs2, map, graph) >= 0)) stop("Negative probability encountered")
+  
+  return(mobs2)
+  # 
+  # h1 <- which(lengths(mobs$heads) == 1)
+  # 
+  # ok <- FALSE
+  # gen <- function(x) {
+  #   len <- length(x)
+  #   if (!is.null(dim(x))) full <- prod(dim(x) + 1)
+  #   else full <- len + 1
+  #   out <- c(rje::rdirichlet(1, rep(alpha, full)))
+  #   out <- out[-(len+seq_len(full-len))]
+  #   # out <- rbeta(length(x), 2*x*alpha, 2*(1-x)*alpha)
+  #   dim(out) <- dim(x)
+  #   out
+  # }
+  # mobs$q[h1] <- mobs2$q[h1] <- rapply(mobs$q[h1], gen, how="replace")
+  # 
+  # if (length(h1) < length(mobs$heads)) {
+  #   while(!ok) {
+  #     mobs2$q[-h1] <- rapply(mobs$q[-h1], gen, how="replace")
+  #     if (all(probdist(mobs2, map, graph) >= 0)) ok = TRUE
+  #   }
+  # }
+  # mobs2
 }
 
 
