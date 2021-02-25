@@ -28,7 +28,7 @@ rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
   
   qs <- unlist(mobs$q)
   
-  mv <- rnorm(length(qs), sd=qs/10)
+  mv <- rnorm(length(qs), sd=qs/4)
   if (any(qs + mv < 0)) {
     message("Scaling down")
     mv <- mv/(-min(mv/qs))+1e-10
