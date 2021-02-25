@@ -22,13 +22,15 @@
 #' 
 #' @export
 rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
+  if (missing(dims)) dims <- rep(2, nv(graph))
   if (missing(graph)) graph <- rADMG(n=length(dims))
   if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   
   qs <- unlist(mobs$q)
   
-  mv <- rnorm(length(qs), sd=qs/4)
+  mv <- runif(length(qs), min=-3*qs/4, max=3*qs/4) + 
+    rnorm(length(qs), sd=0.1/sqrt(qs))
   if (any(qs + mv < 0)) {
     message("Scaling down")
     mv <- mv/(-min(mv/qs))+1e-10
@@ -61,7 +63,10 @@ rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
   ## now scale with a beta to account for dimension
   scal <- rbeta(1, length(qs)/alpha, 1)
   mobs2$q <- relist(qs+mv*fact_u/fact_d*scal, mobs$q)
-  if (!all(probdist(mobs2, map, graph) >= 0)) stop("Negative probability encountered")
+  mobs2 <- c(list(p=probdist(mobs2, map, graph)), mobs2)
+  if (!all(mobs2$p >= 0)) stop("Negative probability encountered")
+  
+  class(mobs2) <- "mparam"
   
   return(mobs2)
   # 
