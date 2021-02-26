@@ -94,6 +94,39 @@ rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
   # mobs2
 }
 
+#' Generate distributions from an ADMG model
+#' 
+#' Generate distributions from an ADMG model
+#' 
+#' @param n number of distributions to generate
+#' @param graph an object of class graph
+#' @param dims integer vector of dimensions of distribution
+#' @param r logical indicating whether or not recursive factorizations should
+#' be used
+#' 
+#' @details The random distribution is
+#' obtained by starting with the uniform distribution, and adding an 
+#' independent (scaled) normal random variables to each Moebius parameter.  We 
+#' then scale the move to reach approximately the boundary of the simplex,
+#' and then pick a value between the uniform distribution and the boundary 
+#' point using a Beta distribution.  
+#' 
+#' @return Object of class \code{tables} giving distributions Markov with 
+#' respect to a distribution in the model associated with \code{graph}.  
+#' 
+#' @importFrom contingency repTables
+#' 
+#' @export
+rmixedgraph <- function(n, graph, dims, r=TRUE, alpha=1) {
+  if (missing(dims)) dims <- rep(2, nv(graph))
+  
+  map <- maps(graph, dims=dims, r=r)
+
+  ## produce tables object
+  out <- repTables(n, function() rADMGdist(graph, dims, map, r=r, alpha=alpha)$p)
+  
+  return(out)
+}
 
 
 #' Calculate joint probabilities.
