@@ -207,10 +207,7 @@ is_ancestral <- function(graph) {
   }
   
   ## if graph is cyclic, return FALSE, otherwise get topological order
-  vs <- tryCatch(topologicalOrder(graph), error = function(e) {
-    if (geterrmessage() == "Graph is cyclic") return(NA)
-    e
-    })
+  vs <- topologicalOrder(graph, warn=FALSE)
   if (is.na(vs[1])) return(FALSE)
 
   
