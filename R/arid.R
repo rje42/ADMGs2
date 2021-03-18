@@ -146,10 +146,11 @@ is_maximal <- function(graph, check=TRUE, ancestral) {
     for (d in seq_along(dis)) {
       v <- dis[[d]]
       for (i in seq_along(v)[-1]) {
-        for (j in setdiff(v[seq_len(i-1)], adj(graph, v[i]))) {
+        oth_ver <- setdiff(v[seq_len(i-1)], adj(graph, v[i]))
+        for (j in seq_along(oth_ver)) {
           ## look at pairs of non-adjacent vertices
-          con_comp <- dis(graph[anc(graph, v[c(i,j)])], v[i])
-          if (v[j] %in% con_comp) return(FALSE)
+          con_comp <- dis(graph[anc(graph, c(v[i],oth_ver[j]))], v[i])
+          if (oth_ver[j] %in% con_comp) return(FALSE)
         }
       }
     }
