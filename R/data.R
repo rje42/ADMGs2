@@ -70,6 +70,16 @@
 ##' @seealso \url{https://doi.org/10.1086/224530}
 "educ_asp"
 
+##' The '16-not-18' Graph
+##' 
+##' The '16-not-18 graph' is an example of a graph with a nested constraint
+##' the removes two parameters in the all binary case: hence the name 16 
+##' (parameters) not 18 (parameters).  
+##' 
+##' @format A mixed graph object that is also an ADMG.
+##' 
+"gr16n18"
+
 ##' Graph that often serves as a counter example
 ##' 
 ##' @format A mixed graph object that is also an ADMG.

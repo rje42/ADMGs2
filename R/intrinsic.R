@@ -24,7 +24,12 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   else gr2 <- graph
   
   ## if no vertices left, return empty lists
-  if (nv(gr2) == 0) return(list(heads=list(), tails=list(), intrinsic=list()))
+  if (nv(gr2) == 0) {
+    out <- list(heads=list(), tails=list(), intrinsic=list())
+    class(out) <- "htList"
+    attr(out, "r") <- r
+    return(out)
+  }
   
   ## otherwise continue
   if (by_district && r) {
@@ -55,6 +60,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
     out <- c(out, out2)
     
     if (missing(max_head)) {
+      class(out) <- "htList"
+      attr(out, "r") <- r
       return(out)
     }
     else {
@@ -63,6 +70,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
         out[[i]]$heads <- out[[i]]$heads[kp]
         out[[i]]$tails <- out[[i]]$tails[kp]
       }
+      class(out) <- "htList"
+      attr(out, "r") <- r
       return(out)
     }
   }
@@ -83,6 +92,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
     
     out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
     out <- c(purrr::transpose(out), out2)
+    class(out) <- "htList"
+    attr(out, "r") <- r
     return(out)
   }
   #  }
@@ -122,6 +133,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   }
   
   out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
+  class(out) <- "htList"
+  attr(out, "r") <- r
   out
 }
 
