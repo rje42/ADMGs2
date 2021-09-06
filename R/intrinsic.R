@@ -27,6 +27,7 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   if (nv(gr2) == 0) {
     out <- list(heads=list(), tails=list(), intrinsic=list())
     class(out) <- "htList"
+    attr(out, "by_dist") <- by_district
     attr(out, "r") <- r
     return(out)
   }
@@ -61,6 +62,7 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
     
     if (missing(max_head)) {
       class(out) <- "htList"
+      attr(out, "by_dist") <- TRUE
       attr(out, "r") <- r
       return(out)
     }
@@ -71,6 +73,7 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
         out[[i]]$tails <- out[[i]]$tails[kp]
       }
       class(out) <- "htList"
+      attr(out, "by_dist") <- TRUE
       attr(out, "r") <- r
       return(out)
     }
@@ -93,6 +96,7 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
     out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
     out <- c(purrr::transpose(out), out2)
     class(out) <- "htList"
+    attr(out, "by_dist") <- TRUE
     attr(out, "r") <- r
     return(out)
   }
@@ -134,10 +138,10 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   
   out <- list(heads = head.list, tails = tail.list, intrinsic = intrinsic)
   class(out) <- "htList"
+  attr(out, "by_dist") <- by_district
   attr(out, "r") <- r
   out
 }
-
 
 # 
 # ##' Get list of heads and tails

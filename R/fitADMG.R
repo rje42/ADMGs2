@@ -50,12 +50,19 @@
 #' @export
 fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps), 
                     SEs = TRUE, sparse = FALSE, quietly = TRUE, use_optim=TRUE) {
-  n = length(graph$vnames)
   if (tol < 0) stop("Tolerance must be positive")
+  
+  n <- length(graph$vnames)
+  if (nv(graph) < n) {
+    graph <- graph[drop=TRUE]
+    n <- nv(graph)
+  }
   
   if (is.array(dat)) dims = dim(dat)
   else if (is.data.frame(dat)) dims = sapply(dat[,-ncol(dat),drop=FALSE], max)+1
   else stop("invalid format for data: should be an array or data.frame object")
+  
+  if (length(dims) != n) stop("Dimension of data and graph do not match")
   
   ## remove any undirected part
   U <- un(graph)
