@@ -4,7 +4,7 @@
 \alias{rADMGdist}
 \title{Generate a distribution from an ADMG model}
 \usage{
-rADMGdist(graph, dims, map, r = TRUE, alpha = 1)
+rADMGdist(graph, dims, map, r = TRUE, alpha = 1, new = FALSE)
 }
 \arguments{
 \item{graph}{an object of class graph}
@@ -17,6 +17,8 @@ rADMGdist(graph, dims, map, r = TRUE, alpha = 1)
 be used}
 
 \item{alpha}{parameter to scale Beta distribution down by.}
+
+\item{new}{logical - should projection method be used?}
 }
 \value{
 Object of class \code{moebius} giving generalized Moebius parameters
@@ -26,11 +28,16 @@ for a distribution in the model associated with \code{graph}.
 Generate a distribution from an ADMG model
 }
 \details{
-The random distribution is
+Under the default method, a random distribution is
 obtained by starting with the uniform distribution, and adding an 
 independent (scaled) normal random variables to each Moebius parameter.  We 
 then scale the move to reach approximately the boundary of the simplex,
 and then pick a value between the uniform distribution and the boundary 
 point using a Beta distribution.  The parameter \code{alpha} being larger
 favours distributions closer to the uniform distribution.
+
+Under the \code{new} method, a random dirichlet (with parameters \code{alpha}) 
+is mapped to the Moebius parameters, and then these parameters are mapped to
+probabilities.  If any of these are negative, then each district is moved 
+towards the uniform distribution until it becomes positive.
 }

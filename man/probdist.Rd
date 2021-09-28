@@ -23,7 +23,7 @@ Given the generalized Moebius parametrization of an ADMG, calculates an
 array of joint probabilities.
 }
 \references{
-Evans and Richardson.
+Evans and Richardson (2010).
 }
 \author{
 Robin Evans

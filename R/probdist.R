@@ -8,8 +8,9 @@
 #' @param r logical indicating whether or not recursive factorizations should
 #' be used
 #' @param alpha parameter to scale Beta distribution down by. 
+#' @param new logical - should projection method be used?
 #' 
-#' @details The random distribution is
+#' @details Under the default method, a random distribution is
 #' obtained by starting with the uniform distribution, and adding an 
 #' independent (scaled) normal random variables to each Moebius parameter.  We 
 #' then scale the move to reach approximately the boundary of the simplex,
@@ -17,20 +18,52 @@
 #' point using a Beta distribution.  The parameter \code{alpha} being larger
 #' favours distributions closer to the uniform distribution.
 #' 
+#' Under the \code{new} method, a random dirichlet (with parameters \code{alpha}) 
+#' is mapped to the Moebius parameters, and then these parameters are mapped to
+#' probabilities.  If any of these are negative, then each district is moved 
+#' towards the uniform distribution until it becomes positive.
+#' 
 #' @return Object of class \code{moebius} giving generalized Moebius parameters
 #' for a distribution in the model associated with \code{graph}.  
 #' 
 #' @export
-rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1) {
+rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1, new=FALSE) {
   if (missing(dims)) dims <- rep(2, nv(graph))
   if (missing(graph)) graph <- rADMG(n=length(dims))
   if (missing(map)) map <- maps(graph, dims=dims, r=r)
   mobs <- mobs2 <- moebius(graph, dims=dims, r=r)
   
+  ## change this
+  beta = 0.5
+  
+  if (new) {
+    p_try <- rdirichlet(1, rep(alpha, prod(dims)))
+    dim(p_try) <- dims
+    mobs <- moebius(graph, ptable = p_try, dims=dims, r=r)
+
+    p_act <- probdist(mobs, map, graph)
+    
+    while (any(p_act < 0)) {
+      ## need to scale down parameters
+      ## first identify districts
+      for (d in seq_along(map$dists)) {
+        dst <- map$dists[[d]]
+        pas <- setdiff(map$pa.dists[[d]], dst)
+        while (any(conditional(p_act, dst, pas) < 0)) {
+          new_q <- beta*unlist(mobs2$q[[d]]) + (1-beta)*unlist(mobs$q[[d]])
+          mobs$q[[d]] <- relist(new_q, skeleton = mobs$q[[d]])
+          p_act <- probdist(mobs, map, graph)
+        }
+      }
+    }
+    
+    return(mobs)
+  }
+  
   qs <- unlist(mobs$q)
   
-  mv <- runif(length(qs), min=-3*qs/4, max=3*qs/4) + 
-    rnorm(length(qs), sd=0.1/sqrt(qs))
+  mv <- runif(length(qs), min=-qs, max=qs) + 
+    rnorm(length(qs), sd=0.25*qs)
   if (any(qs + mv < 0)) {
     message("Scaling down")
     mv <- mv/(-min(mv/qs))+1e-10
@@ -142,7 +175,7 @@ rmixedgraph <- function(n, graph, dims, r=TRUE, alpha=1) {
 #' @return A numeric array of dimensions \code{moebius$dims} giving the joint
 #' distribution described by the Moebius parameters.
 #' @author Robin Evans
-#' @references Evans and Richardson.
+#' @references Evans and Richardson (2010).
 #' 
 #' @export
 probdist <-
