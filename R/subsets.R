@@ -207,7 +207,6 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
     if (any(duplicated(fn))) out <- out[!duplicated(fn)]
   }
   
-  
   ## now obtain sets from directed part of graph
   ht <- headsTails(graph, r=r, max_head = max_size, by_district = FALSE)
   
