@@ -1,3 +1,32 @@
+##' Turn list into a conditional independence
+##' 
+##' @param x either a list with two or three elements, or a vector
+##' @param ... if \code{x} not a list, one or two more arguments
+##' 
+##' @examples 
+##' as.ci(list(1,2))
+##' as.ci(list(1,2,3))
+##' as.ci(1,2)
+##' as.ci(1,2,3)
+##' 
+##' @export
+as.ci <- function(x, ...) {
+  if (!is.list(x)) {
+    args <- list(...)
+    if (length(args) == 1) x <- list(x, args[[1]])
+    else if (length(args) == 2) x <- list(x, args[[1]], args[[2]])
+    else stop("must provide 2 or 3 arguments or first argument must be a list")
+  }
+
+  if (length(x) == 2) {
+    x[[3]] <- integer(0)
+  }
+  else if (!(length(x) == 3)) stop("should have length 2 or 3")
+  
+  class(x) <- "ci"
+  x
+}
+
 ##' Define conditional independence class
 ##' 
 ##' @exportS3Method print ci
