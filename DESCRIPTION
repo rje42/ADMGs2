@@ -7,7 +7,7 @@ Authors@R: c(
 Description: Functions for manipulating and fitting models with discrete 
              mixed graphs. 
 Depends: R (>= 3.1.2),
-         MixedGraphs (>= 0.4.028),
+         MixedGraphs (>= 0.4.36),
          contingency (>= 0.0.6)
 Imports: Matrix,
          methods,

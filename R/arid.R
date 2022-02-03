@@ -114,7 +114,7 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
 ##' @export
 is_arid <- function(graph){
   
-  if (!is.SG(graph)) return(FALSE)
+  if (!is_SG(graph)) return(FALSE)
   vs <- intersect(ch(graph, graph$v), sib(graph, graph$v))
 
   ## if intrinsic closure contains more than v, then not arid
@@ -130,7 +130,7 @@ is_arid <- function(graph){
 is_maximal <- function(graph, check=TRUE, ancestral) {
   
   if (check) {
-    if (!is.SG(graph)) {
+    if (!is_SG(graph)) {
       return(FALSE)
     }
     if (!is_arid(graph)) return(FALSE)

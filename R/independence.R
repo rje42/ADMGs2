@@ -54,7 +54,7 @@ print.ci <- function(x, ...) {
 ##' @export
 localMarkovProperty <- function (graph, unique=TRUE, split=FALSE) {
   if (!is.mixedgraph(graph)) stop("Input must be a mixed graph object")
-  if (!is.ADMG(graph)) stop("Input should be an acyclic directed mixed graph")
+  if (!is_ADMG(graph)) stop("Input should be an acyclic directed mixed graph")
   
   ancSet <- anSets(graph, sort=3)
   ord <- topologicalOrder(graph)

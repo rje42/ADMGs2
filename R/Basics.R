@@ -113,7 +113,7 @@ as.mixedgraph.CADMG <- function(graph) {
 ##' 
 ##' @export fix
 fix <- function(graph, w, v) {
-  if (!is.ADMG(graph)) stop("Graph should be an ADMG")
+  if (!is_ADMG(graph)) stop("Graph should be an ADMG")
   
   if (missing(v)) v = setdiff(graph$v, w)
   else if (length(intersect(w,v))) stop("Fixed and random vertex sets must be disjoint")

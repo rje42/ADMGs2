@@ -218,7 +218,7 @@ fitADMG <- function(dat, graph, r = TRUE, tol = sqrt(.Machine$double.eps),
 #' @export
 fitUG <- function(dat, graph, tol = sqrt(.Machine$double.eps), SEs = TRUE, 
                   quietly = TRUE) {
-  if (!is.UG(graph)) stop("Must be an undirected graph")
+  if (!is_UG(graph)) stop("Must be an undirected graph")
   
   # A <- convert(graph, "graphNEL")
 

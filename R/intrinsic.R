@@ -243,7 +243,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   
   ## on first run, check graph is a summary graph and remove undirected part
   if(!recall) {
-    if(!is.SG(graph)) stop("Graph appears not to be a summary graph or ADMG")
+    if(!is_SG(graph)) stop("Graph appears not to be a summary graph or ADMG")
     
     un_g <- un(graph)
     if (length(un_g) > 0) {
@@ -411,7 +411,7 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
   if (missing(maxbarren) || maxbarren > nv(graph)) maxbarren = nv(graph)
   out <- list()
   
-  if(!is.ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
+  if(!is_ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
   
   subs <- anSets2(graph, maxbarren = maxbarren, same_dist = TRUE)
   if (by_district) d <- sapply(subs, function(x) subsetmatch(x[1], districts))
