@@ -157,7 +157,7 @@ split_ci <- function (cis) {
   
   cis <- rapply(cis, as.integer, how="replace")
   cis <- lapply(cis, function(x) `class<-`(x, "ci"))
-  
+
   cis
 }
 
@@ -195,7 +195,7 @@ standardize_cis <- function (cis) {
   cis <- rapply(cis, as.integer, how="replace")
   cis <- lapply(cis, function(x) `class<-`(x, "ci"))
   
-  
+
   cis
 }
 
