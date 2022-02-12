@@ -23,7 +23,9 @@ as.ci <- function(x, ...) {
   }
   else if (!(length(x) == 3)) stop("should have length 2 or 3")
   
+  x <- lapply(x, as.integer)
   class(x) <- "ci"
+  
   x
 }
 
@@ -90,26 +92,111 @@ localMarkovProperty <- function (graph, unique=TRUE, split=FALSE) {
   
   ## if required, split into univariate independences
   if (split) {
-    new_indeps <- list()
-    rmv <- integer(0)
-    
-    for (i in seq_along(out)) {
-      if (length(out[[i]][[2]]) > 1) {
-        vnew_indeps <- vector(mode="list", length=length(out[[i]][[2]]))
-        cond <- out[[i]][[3]]
-        for (j in seq_along(out[[i]][[2]])) {
-          vnew_indeps[[j]] <- list(out[[i]][[1]], out[[i]][[2]][j], cond)
-          cond <- c(cond, out[[i]][[2]][j])
-          class(vnew_indeps[[j]]) <- "ci"
-        }
-        rmv <- c(rmv, i)
-        new_indeps <- c(new_indeps, vnew_indeps)
-      }
-    }
-    out <- c(out[-rmv], new_indeps)
+    out <- split_ci(out)
   }
   
-  out
+  standardize_cis(out)
+}
+
+##' Operations for conditional independences
+##' 
+##' Operations on conditional independence objects
+##' 
+##' @param cis object of class \code{ci} or list thereof
+##' 
+##' @return A list with the relevant output in, one entry for each conditional 
+##' independence put into \code{cis}. 
+##' 
+##' @name ci_operations
+NULL
+
+##' @describeIn ci_operations Split conditional independences into univariate pieces
+##' @export
+split_ci <- function (cis) {
+  if ("ci" %in% class(cis)) cis <- list(cis)
+  
+  new_indeps <- list()
+  rmv <- integer(0)
+  
+  ## start by splitting any second terms
+  for (i in seq_along(cis)) {
+    if (length(cis[[i]][[2]]) > 1) {
+      vnew_indeps <- vector(mode="list", length=length(cis[[i]][[2]]))
+      cond <- cis[[i]][[3]]
+      for (j in seq_along(cis[[i]][[2]])) {
+        vnew_indeps[[j]] <- list(cis[[i]][[1]], cis[[i]][[2]][j], cond)
+        cond <- c(cond, cis[[i]][[2]][j])
+        class(vnew_indeps[[j]]) <- "ci"
+      }
+      rmv <- c(rmv, i)
+      new_indeps <- c(new_indeps, vnew_indeps)
+    }
+  }
+  if (length(rmv) > 0) cis <- c(cis[-rmv], new_indeps)
+
+  ## reset new_indeps and rmv
+  new_indeps <- list()
+  rmv <- integer(0)
+  
+  ## now split any first terms  
+  for (i in seq_along(cis)) {
+    if (length(cis[[i]][[1]]) > 1) {
+      vnew_indeps <- vector(mode="list", length=length(cis[[i]][[1]]))
+      cond <- cis[[i]][[3]]
+      for (j in seq_along(cis[[i]][[1]])) {
+        vnew_indeps[[j]] <- list(cis[[i]][[1]][j], cis[[i]][[2]], cond)
+        cond <- c(cond, cis[[i]][[1]][j])
+        class(vnew_indeps[[j]]) <- "ci"
+      }
+      rmv <- c(rmv, i)
+      new_indeps <- c(new_indeps, vnew_indeps)
+    }
+  }
+  if (length(rmv) > 0) cis <- c(cis[-rmv], new_indeps)
+  
+  
+  cis <- rapply(cis, as.integer, how="replace")
+  cis <- lapply(cis, function(x) `class<-`(x, "ci"))
+  
+  cis
+}
+
+##' @describeIn ci_operations Standardize conditional independences
+##' @export
+standardize_cis <- function (cis) {
+  if ("ci" %in% class(cis)) cis <- list(cis)
+  
+  cis2 <- purrr::transpose(cis)
+  
+  cis2[[1]] <- mapply(function(x,y) sort.int(unique.default(setdiff(x,y))), 
+                      cis2[[1]], cis2[[3]], SIMPLIFY = FALSE)
+  cis2[[2]] <- mapply(function(x,y) sort.int(unique.default(setdiff(x,y))), 
+                      cis2[[2]], cis2[[3]], SIMPLIFY = FALSE)
+  cis2[[3]] <- lapply(cis2[[3]], function(x) sort.int(unique.default(x)))
+  
+  rmv <- (lengths(cis2[[1]])==0) | (lengths(cis2[[2]])==0)
+  cis2 <- purrr::transpose(purrr::transpose(cis2)[!rmv])
+  if (length(cis2) == 0) return(list())
+  
+  if (any(lengths(mapply(intersect, cis2[[1]], cis2[[2]])) > 0)) stop("Should not be overlap between two main sets")
+  
+  minA <- sapply(cis2[[1]], min)
+  minB <- sapply(cis2[[2]], min)
+  tmpA <- tmpB <- vector("list", length(cis2[[1]]))
+  tmpA[minA < minB] <- cis2[[2]][minA < minB]
+  tmpA[minA > minB] <- cis2[[1]][minA > minB]
+  tmpB[minA < minB] <- cis2[[1]][minA < minB]
+  tmpB[minA > minB] <- cis2[[2]][minA > minB]
+  
+  cis2[[1]] <- tmpA
+  cis2[[2]] <- tmpB
+  
+  cis <- purrr::transpose(cis2)
+  cis <- rapply(cis, as.integer, how="replace")
+  cis <- lapply(cis, function(x) `class<-`(x, "ci"))
+  
+  
+  cis
 }
 
 ## Tests if one independence implies another via graphoids 2 and 3
