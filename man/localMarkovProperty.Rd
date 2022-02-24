@@ -4,7 +4,7 @@
 \alias{localMarkovProperty}
 \title{Local Markov property for ADMGs}
 \usage{
-localMarkovProperty(graph, unique = TRUE, split = FALSE)
+localMarkovProperty(graph, unique = TRUE, split = FALSE, ord)
 }
 \arguments{
 \item{graph}{an ADMG as an object of class \code{mixedgraph}}
@@ -12,8 +12,14 @@ localMarkovProperty(graph, unique = TRUE, split = FALSE)
 \item{unique}{logical: should overlapping independences be removed?}
 
 \item{split}{logical: should independences involve only singletons?}
+
+\item{ord}{optional topological ordering}
 }
 \description{
 Get a list of independences implied by the local Markov property applied to
 an ADMG.
+}
+\details{
+The argument \code{ord} just controls the order in which 
+one goes through the variables.
 }

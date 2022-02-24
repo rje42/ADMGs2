@@ -52,14 +52,18 @@ print.ci <- function(x, ...) {
 ##' @param graph an ADMG as an object of class \code{mixedgraph}
 ##' @param unique logical: should overlapping independences be removed?
 ##' @param split logical: should independences involve only singletons?
+##' @param ord optional topological ordering
+##' 
+##' @details The argument \code{ord} just controls the order in which 
+##' one goes through the variables.
 ##' 
 ##' @export
-localMarkovProperty <- function (graph, unique=TRUE, split=FALSE) {
+localMarkovProperty <- function (graph, unique=TRUE, split=FALSE, ord) {
   if (!is.mixedgraph(graph)) stop("Input must be a mixed graph object")
   if (!is_ADMG(graph)) stop("Input should be an acyclic directed mixed graph")
   
   ancSet <- anSets(graph, sort=3)
-  ord <- topologicalOrder(graph)
+  if (missing(ord)) ord <- topologicalOrder(graph)
   
   out <- list()
   
@@ -166,6 +170,7 @@ split_ci <- function (cis) {
 standardize_cis <- function (cis) {
   if ("ci" %in% class(cis)) cis <- list(cis)
   
+  if (length(cis) == 0) return(list())
   cis2 <- purrr::transpose(cis)
   
   cis2[[1]] <- mapply(function(x,y) sort.int(unique.default(setdiff(x,y))), 
