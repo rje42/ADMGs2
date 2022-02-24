@@ -166,6 +166,7 @@ split_ci <- function (cis) {
 standardize_cis <- function (cis) {
   if ("ci" %in% class(cis)) cis <- list(cis)
   
+  if (length(cis) == 0) return(list())
   cis2 <- purrr::transpose(cis)
   
   cis2[[1]] <- mapply(function(x,y) sort.int(unique.default(setdiff(x,y))), 
