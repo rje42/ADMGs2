@@ -57,6 +57,9 @@ rADMGdist <- function(graph, dims, map, r=TRUE, alpha=1, new=FALSE) {
       }
     }
     
+    mobs <- c(p=p_act, mobs)
+    class(mobs) <- "mparam"
+    
     return(mobs)
   }
   
