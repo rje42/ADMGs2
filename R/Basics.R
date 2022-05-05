@@ -125,8 +125,8 @@ fix <- function(graph, w, v) {
   
   # graph <- withEdgeList(graph)
   
-  graph <- mutilate(graph[v_left], w, etype="directed", -1L)
-  graph <- mutilate(graph, w, etype="bidirected", 0L)
+  graph <- mutilate(graph[v_left], w, etype="directed", dir=-1L)
+  graph <- mutilate(graph, w, etype="bidirected", dir=0L)
   
   # e = graph$edges
   # if (nedge(graph, "directed") > 0) {

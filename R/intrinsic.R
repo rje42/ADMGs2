@@ -143,6 +143,65 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
   out
 }
 
+##' @export
+headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
+{
+  ## deal with trivial cases
+  if (length(graph$v) == 0) {
+    if (by_district) out <- list()
+    else out <- list(heads=list(), tails=list(), intrinsic=list())
+    
+    class(out) <- "htList"
+    attr(out, "by_dist") <- by_district
+    attr(out, "r") <- r
+    
+    return(out)
+  }
+
+  ## determine intrinsic sets, or check those given are in correct format  
+  if (missing(intrinsic)) intrinsic <- intrinsicSets3(graph, r=r, by_district = by_district)
+  else if (by_district && !is.list(intrinsic[[1]])) {
+    intrinsic <- intrinsicSets3(graph, r=r, by_district = by_district)
+  }
+  else if (!by_district && is.list(intrinsic[[1]])) {
+    intrinsic <- unlist(intrinsic, recursive = FALSE)
+  }
+  
+  ## otherwise continue
+  if (r) {
+    tails = lapply(intrinsic, function(v) pa(graph, v))
+    heads <- mapply(setdiff, intrinsic, tails, SIMPLIFY=FALSE)
+  }
+  else {
+    heads = lapply(intrinsic, function(v) barren(graph, v))
+    tails = mapply(function(x, y) setdiff(c(x, pa(graph, x)), y), intrinsic, heads, SIMPLIFY = FALSE)
+    # for (j in seq_along(heads)) tails[[j]] = setdiff(union(intrinsic[[j]], pa(graph, intrinsic[[j]])), heads[[j]])
+  }
+
+  ## apply sorting rules
+  if (sort > 0 && !r) {
+    tails <- lapply(tails, unique.default)
+  }
+  if (sort > 1) {
+    heads <- lapply(heads, sort.int)
+    tails <- lapply(tails, sort.int)
+    intrinsic <- lapply(intrinsic, sort.int)
+  }
+  if (sort > 2) {
+    ord <- order(sapply(heads, function(x) sum(2^(x-1))))
+    heads <- heads[ord]
+    tails <- tails[ord]
+    intrinsic <- intrinsic[ord]
+  }
+  
+  out <- list(heads = heads, tails = tails, intrinsic = intrinsic)
+  class(out) <- "htList"
+  attr(out, "by_dist") <- FALSE
+  attr(out, "r") <- r
+  out
+}
+
+
 # 
 # ##' Get list of heads and tails
 # ##' 
@@ -254,27 +313,45 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   if (recall || length(un_g) == 0) clq <- list()
   
   out <- list()
-  districts <- districts(graph[random(graph)])
-  if (by_district && r) return(lapply(districts, 
-                                 function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
+  dists <- districts(graph[random(graph)])
+  if (by_district) {
+    
+    if (!r) {
+      subgrs <- lapply(dists, function(x) graph[x])
+      for (d in seq_along(dists)) {
+        for (i in dists[[d]]) {
+          des <- MixedGraphs:::find_and_stop(graph[anc(graph, dists[[d]])], i, 
+                                             setdiff(dists[[d]], i), 
+                                             etype="directed", dir=-1)
+          addE <- eList(lapply(des, function(x) c(i,x)))
+          subgrs[[d]] <- addEdges(subgrs[[d]], directed=addE)
+        }
+      }
+    }
+    else subgrs <- lapply(dists, function(x) graph[x])
+    
+    return(lapply(subgrs, 
+                  function(x) intrinsicSets(x, r=r, by_district=FALSE, 
+                                            sort=sort, recall=TRUE)))
+  }
   
   out <- list()
   
   ## go along each district and find intrinsic sets
-  for(i in seq_along(districts)){
+  for(i in seq_along(dists)){
     if(by_district) {
       out[[i]] <- list()
     }
-    dis <- districts[[i]]
+    dis <- dists[[i]]
     
     if(r) {
       # if (length(dis) <= 1) {
-      if(by_district) {
-        out[[i]] <- c(out[[i]], list(dis))
-      } 
-      else {
-        out <- c(out, list(dis))
-      }
+      # if(by_district) {
+      #   out[[i]] <- c(out[[i]], list(dis))
+      # } 
+      # else {
+      out <- c(out, list(dis))
+      # }
       
       if (length(dis) <= 1) next
       # }
@@ -291,13 +368,13 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
         recursed_sets <- Recall(an_set_subgraph, r=r, FALSE, recall=TRUE)
         
         ## add in new sets
-        if(by_district){
-          out[[i]] <- c(out[[i]], recursed_sets)
-          if (length(d) == 1) out[[i]] <- c(out[[i]], list(an_set))
-        } else {
+        # if(by_district){
+        #   out[[i]] <- c(out[[i]], recursed_sets)
+        #   if (length(d) == 1) out[[i]] <- c(out[[i]], list(an_set))
+        # } else {
           out <- c(out, recursed_sets)
           if (length(d) == 1) out <- c(out, list(an_set))
-        }
+        # }
       }
     } # if (r)
     else {
