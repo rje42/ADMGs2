@@ -74,12 +74,19 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
   
   out <- unlist(out, recursive = FALSE)
   out <- c(clq, out)
-  
-  if (sort > 1) {
-    out <- lapply(out, sort.int)
-    if (sort > 2) {
-      ord <- order(sapply(out, function(x) sum(2^(x-1))))
-      out <- out[ord]
+
+  ## apply sort criteria  
+  if (sort > 0) {
+    idx <- sapply(out, function(x) sum(2^(x-1)))
+    out <- out[!duplicated(idx)]
+ 
+    if (sort > 1) {
+      out <- lapply(out, sort.int)
+      
+      if (sort > 2) {
+        idx <- idx[!duplicated(idx)]
+        out <- out[order(idx)]
+      }
     }
   }
   
