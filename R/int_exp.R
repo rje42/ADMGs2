@@ -94,15 +94,23 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
 }
 
 intSets <- function(graph, nt_rmv, topOrd) {
+  # print(graph$v)
   ## see which vertices can be removed
   rmv <- match(setdiff(sterile(graph), nt_rmv), topOrd)
   if (length(rmv) == 0) return(list(graph$v))
   max_v <- last(nt_rmv)
   
   dists <- lapply(seq_along(rmv), 
-                  function(i) dis(graph[-topOrd[rmv[seq_len(i)]]], max_v))
-  nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], x), 
-                        seq_along(rmv), dists)
+                  function(i) dis(graph[-topOrd[rmv[i]]], max_v, sort=2))
+  dup <- duplicated(dists)
+  
+  nt_rmv_list <- rep(list(nt_rmv), sum(!dup))
+  # nt_rmv_list <- mapply(function(i,x) c(topOrd[rmv[i]], nt_rmv), 
+  #                                             seq_along(rmv), dists, SIMPLIFY = FALSE)
+  
+  
+  # nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], x), 
+  #                       seq_along(rmv), dists, SIMPLIFY = FALSE)
   # graph2 <- graph[-graph$v[rmv]]
   # graph2 <- graph[dis(graph, max_v)]
   # out <- Recall(graph2, topOrd, nt_rmv=nt_rmv)
