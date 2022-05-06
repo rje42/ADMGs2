@@ -313,45 +313,27 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   if (recall || length(un_g) == 0) clq <- list()
   
   out <- list()
-  dists <- districts(graph[random(graph)])
-  if (by_district) {
-    
-    if (!r) {
-      subgrs <- lapply(dists, function(x) graph[x])
-      for (d in seq_along(dists)) {
-        for (i in dists[[d]]) {
-          des <- MixedGraphs::pathConnected(graph[anc(graph, dists[[d]])], i, 
-                                             setdiff(dists[[d]], i), 
-                                             etype="directed", dir=-1)
-          addE <- eList(lapply(des, function(x) c(i,x)))
-          subgrs[[d]] <- addEdges(subgrs[[d]], directed=addE)
-        }
-      }
-    }
-    else subgrs <- lapply(dists, function(x) graph[x])
-    
-    return(lapply(subgrs, 
-                  function(x) intrinsicSets(x, r=r, by_district=FALSE, 
-                                            sort=sort, recall=TRUE)))
-  }
+  districts <- districts(graph[random(graph)])
+  if (by_district && r) return(lapply(districts, 
+                                      function(x) intrinsicSets(graph[x], r, by_district=FALSE, sort=sort, recall=TRUE)))
   
   out <- list()
   
   ## go along each district and find intrinsic sets
-  for(i in seq_along(dists)){
+  for(i in seq_along(districts)){
     if(by_district) {
       out[[i]] <- list()
     }
-    dis <- dists[[i]]
+    dis <- districts[[i]]
     
     if(r) {
       # if (length(dis) <= 1) {
-      # if(by_district) {
-      #   out[[i]] <- c(out[[i]], list(dis))
-      # } 
-      # else {
-      out <- c(out, list(dis))
-      # }
+      if(by_district) {
+        out[[i]] <- c(out[[i]], list(dis))
+      } 
+      else {
+        out <- c(out, list(dis))
+      }
       
       if (length(dis) <= 1) next
       # }
@@ -368,13 +350,13 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
         recursed_sets <- Recall(an_set_subgraph, r=r, FALSE, recall=TRUE)
         
         ## add in new sets
-        # if(by_district){
-        #   out[[i]] <- c(out[[i]], recursed_sets)
-        #   if (length(d) == 1) out[[i]] <- c(out[[i]], list(an_set))
-        # } else {
+        if(by_district){
+          out[[i]] <- c(out[[i]], recursed_sets)
+          if (length(d) == 1) out[[i]] <- c(out[[i]], list(an_set))
+        } else {
           out <- c(out, recursed_sets)
           if (length(d) == 1) out <- c(out, list(an_set))
-        # }
+        }
       }
     } # if (r)
     else {
