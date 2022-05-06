@@ -157,7 +157,7 @@ headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
     
     return(out)
   }
-
+  
   ## determine intrinsic sets, or check those given are in correct format  
   if (missing(intrinsic)) intrinsic <- intrinsicSets3(graph, r=r, by_district = by_district)
   else if (by_district && !is.list(intrinsic[[1]])) {
@@ -177,7 +177,7 @@ headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
     tails = mapply(function(x, y) setdiff(c(x, pa(graph, x)), y), intrinsic, heads, SIMPLIFY = FALSE)
     # for (j in seq_along(heads)) tails[[j]] = setdiff(union(intrinsic[[j]], pa(graph, intrinsic[[j]])), heads[[j]])
   }
-
+  
   ## apply sorting rules
   if (sort > 0 && !r) {
     tails <- lapply(tails, unique.default)
@@ -253,6 +253,8 @@ headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
 #   out
 # }
 # 
+
+
 
 
 ## Finds the set of all intrinsic sets of a CADMG
@@ -385,7 +387,7 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=F
   
   ## clean up and finish
   out <- c(clq, out)
-    
+  
   if (by_district) {
     if (sort > 0) {
       rapply(out, sort.int, how = "replace")
@@ -609,7 +611,7 @@ intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
     if (length(districts(graph[S])) <= 1) return(S)
     else stop("Not contained in a single 'intrinsic' set")
   }
-
+  
   ## deal with recursive case
   tmp2 <- graph$v
   tmp <- graph[dist]
@@ -627,7 +629,7 @@ intrinsicClosure = function(graph, set, r=TRUE, sort=1) {
   out = tmp$v
   
   if (sort > 1) out = sort.int(out)
-
+  
   return(out)
 }
 
@@ -649,13 +651,13 @@ ancDisClos <- function (graph, C, int) {
   tmp <- graph[anc(graph, C)]
   tmp <- dis(tmp, C[1])
   if (setequal(C, tmp)) return(graph$v)
-
+  
   ## otherwise, get a list of the intrinsic sets
   if (missing(int)) int <- intrinsicSets(graph, sort = 3)
-
+  
   wh <- sapply(int, function(x) is.subset(C, x))
   int <- int[wh]
-
+  
   int <- int[lengths(int) > length(C)]
   out <- rep(FALSE, length(int))
   
@@ -665,7 +667,7 @@ ancDisClos <- function (graph, C, int) {
     if (setequal(C, dis(tmp, C[1]))) out[i] <- TRUE
     # if (setmatch(C, districts(graph), nomatch = 0) > 0) out[i] <- TRUE
   }
-
+  
   int <- int[out]
   kp <- list()
   int <- int[order(sapply(int, function(x) sum(2^x)))]
@@ -702,7 +704,7 @@ ancDisClos <- function (graph, C, int) {
   #   
   #   if(setequal(C, graph$v)) break
   # }
-
+  
   Cstar
 }
 
@@ -783,7 +785,7 @@ partition = function(graph, v = graph$v, r=TRUE, ht, head_order) {
 ##' 
 ## @export factorize
 factorize = function(graph, v = graph$v, r = TRUE, ht, head_order) {
-
+  
   if(length(v) == 0) {
     head.list <- list()
     tail.list <- list()
@@ -844,4 +846,3 @@ factorize0 = function (graph, v = seq_len(n), r = TRUE, ht, head.order) {
   
   return(out)
 }
-

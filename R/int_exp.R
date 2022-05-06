@@ -105,6 +105,7 @@ intSets <- function(graph, nt_rmv, topOrd) {
   dup <- duplicated(dists)
   
   nt_rmv_list <- rep(list(nt_rmv), sum(!dup))
+  dists <- dists[!dup]
   # nt_rmv_list <- mapply(function(i,x) c(topOrd[rmv[i]], nt_rmv), 
   #                                             seq_along(rmv), dists, SIMPLIFY = FALSE)
   
