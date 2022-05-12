@@ -144,7 +144,8 @@ headsTails = function (graph, r = TRUE, by_district = FALSE, sort=1, intrinsic, 
 }
 
 ##' @export
-headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
+headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic, 
+                        max_head)
 {
   ## deal with trivial cases
   if (length(graph$v) == 0) {
@@ -176,6 +177,14 @@ headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic)
     heads = lapply(intrinsic, function(v) barren(graph, v))
     tails = mapply(function(x, y) setdiff(c(x, pa(graph, x)), y), intrinsic, heads, SIMPLIFY = FALSE)
     # for (j in seq_along(heads)) tails[[j]] = setdiff(union(intrinsic[[j]], pa(graph, intrinsic[[j]])), heads[[j]])
+  }
+  
+  ## apply maximum heads size
+  if (!missing(max_head)) {
+    wh <- lengths(heads) > max_head
+    intrinsic <- intrinsic[]
+    tails <- tails[!wh]
+    heads <- heads[!wh]
   }
   
   ## apply sorting rules
