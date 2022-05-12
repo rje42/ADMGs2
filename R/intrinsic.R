@@ -187,7 +187,7 @@ headsTails3 = function (graph, r = TRUE, sort=1, by_district = FALSE, intrinsic,
     heads <- heads[!wh]
   }
   
-  ## apply sorting rules
+  ### apply sorting rules
   if (sort > 0 && !r) {
     tails <- lapply(tails, unique.default)
   }
