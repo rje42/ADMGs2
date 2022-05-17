@@ -71,7 +71,7 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
   #   }
     
   ## now obtain intrinsic sets
-  out <- mapply(function(x,y) intSets(x, y, topOrd), initDistGrs, topOrd, SIMPLIFY = FALSE)
+  out <- mapply(function(x,y) intSets(x, y, topOrd, r=r), initDistGrs, topOrd, SIMPLIFY = FALSE)
     # out <- lapply(subgrs, intSets, topOrd)
   # }
   
@@ -96,15 +96,21 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
   return(out)
 }
 
-intSets <- function(graph, nt_rmv, topOrd) {
+intSets <- function(graph, nt_rmv, topOrd, r=TRUE) {
   # print(graph$v)
   ## see which vertices can be removed
   rmv <- match(setdiff(sterile(graph), nt_rmv), topOrd)
   if (length(rmv) == 0) return(list(graph$v))
   max_v <- last(nt_rmv)
-  
-  dists <- lapply(seq_along(rmv), 
-                  function(i) dis(graph[-topOrd[rmv[i]]], max_v, sort=2))
+
+  # if (r) {
+    dists <- lapply(seq_along(rmv), 
+                    function(i) dis(graph[-topOrd[rmv[i]]], max_v, sort=2))
+  # }
+  # else {
+  #   dists <- lapply(seq_along(rmv), ### USE LATENT PROJECTION
+  #                   function(i) dis(graph[-topOrd[rmv[i]]], max_v, sort=2))
+  # }
   dup <- duplicated(dists)
   if (any(dup)) stop()  # shouldn't be any repetition
   
@@ -114,13 +120,24 @@ intSets <- function(graph, nt_rmv, topOrd) {
   #                                             seq_along(rmv), dists, SIMPLIFY = FALSE)
   
   
-  nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], x),
+  if (r) {
+    nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], x),
                         seq_along(rmv), dists, SIMPLIFY = FALSE)
+  }
+  else {
+    nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], anc(graph, x)),
+                        seq_along(rmv), dists, SIMPLIFY = FALSE)
+  }
   # graph2 <- graph[-graph$v[rmv]]
   # graph2 <- graph[dis(graph, max_v)]
   # out <- Recall(graph2, topOrd, nt_rmv=nt_rmv)
   
-  out <- c(list(list(graph$v)), mapply(function(x,y) intSets(graph[x],y,topOrd), dists, nt_rmv_list, SIMPLIFY = FALSE))
+  # if (r) {
+    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(graph[x],y,topOrd,r=TRUE), dists, nt_rmv_list, SIMPLIFY = FALSE))
+  # }
+  # else {
+  #   out <- c(list(list(graph$v)), mapply(function(x,y,gr) intSets(gr[x],y,topOrd,r=FALSE), x=dists, y=nt_rmv_list, gr=grs, SIMPLIFY = FALSE))
+  # }
   
   return(unlist(out, recursive = FALSE))
 }

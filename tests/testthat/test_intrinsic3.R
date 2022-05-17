@@ -8,6 +8,7 @@ int6 <- intrinsicSets3(makeGraphChain(6, "b"), r=FALSE, sort=3)
 int6a <- intrinsicSets3(graphCr("1 -> 2 <-> 3 <-> 4 <-> 5 <- 6"), r=FALSE, sort=3)
 int7 <- intrinsicSets3(makeGraphChain(7, "b"), r=FALSE, sort=3)
 int7a <- intrinsicSets3(graphCr("1 -> 2 <-> 3 <-> 4 <-> 5 <-> 6 <- 7"), r=FALSE, sort=3)
+int6zh <- intrinsicSets3(graphCr("1 -> 4 <-> 2 <-> 1 <-> 3 <-> 5 <- 4"), r=FALSE, sort=3)
 
 test_that("intrinsicSets3 works OK", {
   expect_equal(int1r, list(1, 2, 3, 4, 5, 4:5, c(2,4,5), 3:5, 2:5, 1:5))
@@ -23,6 +24,8 @@ test_that("intrinsicSets3 works OK", {
                           3:7, 2:7, 1:7))
   expect_equal(int7a, list(1L, 2L, 3L, 2:3, 4L, 3:4, 2:4, 5L, 4:5, 3:5, 2:5, 6L, 5:6, 
                            4:6, 3:6, 2:6, 7L))
+  expect_equal(int6zh, list(1L, 2L, 1:2, 3L, c(1L, 3L), 1:3, 4L, c(1L, 2L, 4L), 1:4, 
+                            5L, c(3L, 5L), c(1L, 3L, 5L), 1:5))
 })
 
 # test_that("intrinsicSets works OK for CADMGs", {
