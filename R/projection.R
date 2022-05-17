@@ -25,7 +25,7 @@ latentProject <- function(graph, latent, v, only_directed=FALSE, sort=1) {
     if (only_directed) sibs <- integer(0)
     else sibs <- sib(graph, l)
     
-    new_dir[chs] <- pas
+    new_dir[chs] <- list(pas)
     if (sort > 1) new_dir <- mapply(function(x,y) sort.int(x), new_dir)
     if (!only_directed) {
       new_bi[chs] <- list(c(sibs, chs))

@@ -121,19 +121,23 @@ intSets <- function(graph, nt_rmv, topOrd, r=TRUE) {
   
   
   if (r) {
+    ## just take the district for recursive intrinsic sets
     nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], x),
                         seq_along(rmv), dists, SIMPLIFY = FALSE)
+    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(graph[x],y,topOrd,r=TRUE), dists, nt_rmv_list, SIMPLIFY = FALSE))
   }
   else {
+    ## need to include ancestors in nt_rmv for non-recursive sets
     nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], anc(graph, x)),
                         seq_along(rmv), dists, SIMPLIFY = FALSE)
+    grs <- lapply(dists, function(x) latentProject(graph, v=x, only_directed = TRUE))
+    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(x,y,topOrd,r=TRUE), grs, nt_rmv_list, SIMPLIFY = FALSE))
   }
   # graph2 <- graph[-graph$v[rmv]]
   # graph2 <- graph[dis(graph, max_v)]
   # out <- Recall(graph2, topOrd, nt_rmv=nt_rmv)
   
   # if (r) {
-    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(graph[x],y,topOrd,r=TRUE), dists, nt_rmv_list, SIMPLIFY = FALSE))
   # }
   # else {
   #   out <- c(list(list(graph$v)), mapply(function(x,y,gr) intSets(gr[x],y,topOrd,r=FALSE), x=dists, y=nt_rmv_list, gr=grs, SIMPLIFY = FALSE))
