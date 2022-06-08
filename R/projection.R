@@ -4,6 +4,7 @@
 ##' @param latent vertices to project out
 ##' @param v alternatively, vertices to keep
 ##' @param only_directed logical: should only directed edges be added in?
+##' @param sort integer:1 for unique but unsorted neighbours in the \code{adjList}, 2 for sorted before being added in.
 ##' 
 ##' @details \code{only_directed} should only be used in special situations,
 ##' such as when computing non-recursive intrisic sets.

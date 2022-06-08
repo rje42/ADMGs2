@@ -1,8 +1,48 @@
+##' Generate a distribution from a DAG model
+##' 
+##' Simulate conditional probability tables to obtain a 
+##' discrete DAG model that is Markov with respect to the
+##' graph.
+##' 
+##' @param n a DAG object of class \code{mixedgraph}
+##' @param graph a DAG object of class \code{mixedgraph}
+##' @param dims integer vector of dimensions of distribution
+##' @param alpha parameter to use in Dirichlet distribution
+##' 
+##' @details Simulated conditional probability tables for each
+##' node given its parents, and uses this to obtain the joint 
+##' distribution.
+##' 
+##' @export
+rDAGdist <- function(n, graph, dims=rep(2L, nv(graph)), alpha=1) {
+
+  if (!is.mixedgraph(graph)) stop("'graph' must be an object of class mixedgraph")
+  if (!is_DAG(graph)) stop("'graph' must be a DAG")
+  
+  out <- tables(n, tdim=dims)
+  ## get this to work
+  # tdimnames(out) <- list(graph$vnames[graph$v])
+  
+  for (i in seq_along(graph$v)) {
+    pas <- pa(graph, graph$v[i])
+    vpos <- c(i,match(pas, graph$v))
+    v_dims <- dims[vpos]
+    dists <- rcondProbMat(n, dim=v_dims, alpha=alpha, condition = 1+seq_along(pas))
+    
+    dists <- aperm(dists, order(vpos))
+    out <- out*c(dists[,patternRepeat0(vpos, n=dims)])
+  }
+  
+  if (n == 0) return(array(dim = c(0L, dims)))
+  
+  return(out)
+}
+
 #' Generate a distribution from an ADMG model
 #' 
 #' Generate a distribution from an ADMG model
 #' 
-#' @param graph an object of class graph
+#' @param graph an ADMG object of class \code{mixedgraph}
 #' @param dims integer vector of dimensions of distribution
 #' @param map optionally, the output of \code{maps()}
 #' @param r logical indicating whether or not recursive factorizations should

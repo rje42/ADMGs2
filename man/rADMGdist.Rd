@@ -7,7 +7,7 @@
 rADMGdist(graph, dims, map, r = TRUE, alpha = 1, new = FALSE)
 }
 \arguments{
-\item{graph}{an object of class graph}
+\item{graph}{an ADMG object of class \code{mixedgraph}}
 
 \item{dims}{integer vector of dimensions of distribution}
 

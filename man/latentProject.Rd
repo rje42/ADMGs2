@@ -14,6 +14,8 @@ latentProject(graph, latent, v, only_directed = FALSE, sort = 1)
 \item{v}{alternatively, vertices to keep}
 
 \item{only_directed}{logical: should only directed edges be added in?}
+
+\item{sort}{integer:1 for unique but unsorted neighbours in the \code{adjList}, 2 for sorted before being added in.}
 }
 \description{
 Project out latent variables
