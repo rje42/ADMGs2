@@ -177,12 +177,15 @@ is_maximal <- function(graph, check=TRUE, ancestral) {
 ##' Check if a graph is maximal and arid
 ##' 
 ##' @param graph summary graph or ADMG of class \code{mixedgraph}
+##' @param directed logical: if \code{TRUE}, undirected edges are not allowed
 ##' 
 ##' @details Checks if the graph is both maximal and arid
 ##' using the functions \code{is_arid} and \code{is_maximal}.
 ##' 
 ##' @export
-is_MArG <- function(graph) {
+is_MArG <- function(graph, directed=FALSE) {
+  if (directed && nedge(graph, "undirected") > 0) return(FALSE)
+  else if (nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected")) > 0)) return(FALSE)
   
   if(!is_arid(graph)) return(FALSE)
   if(!is_maximal(graph, check=FALSE)) return(FALSE)
@@ -233,7 +236,10 @@ is_ancestral <- function(graph) {
 ##' or the failure of either.
 ##' 
 ##' @export
-is_MAG <- function(graph) {
+is_MAG <- function(graph, directed=FALSE) {
+  if (directed && nedge(graph, "undirected") > 0) return(FALSE)
+  else if (nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected")) > 0)) return(FALSE)
+  
   ancestral <- is_ancestral(graph)
   if (!ancestral) return(FALSE)
   else return(is_maximal(graph, check=FALSE, ancestral=ancestral))

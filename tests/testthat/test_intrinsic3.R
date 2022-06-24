@@ -10,6 +10,8 @@ int7 <- intrinsicSets3(makeGraphChain(7, "b"), r=FALSE, sort=3)
 int7a <- intrinsicSets3(graphCr("1 -> 2 <-> 3 <-> 4 <-> 5 <-> 6 <- 7"), r=FALSE, sort=3)
 int6zh <- intrinsicSets(graphCr("1 -> 4 <-> 2 <-> 1 <-> 3 <-> 5 <- 4"), r=FALSE, sort=3)
 int6zha <- intrinsicSets3(graphCr("1 -> 4 <-> 2 <-> 1 <-> 3 <-> 5 <- 4"), r=FALSE, sort=3)
+int6cyc <- intrinsicSets3(graphCr("2 <-> 1 <-> 3 <-> 4 <-> 6 <-> 5 <-> 2"), r=FALSE, sort=3)
+
 
 test_that("intrinsicSets3 works OK", {
   expect_equal(int1r, list(1, 2, 3, 4, 5, 4:5, c(2,4,5), 3:5, 2:5, 1:5))

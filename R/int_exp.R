@@ -13,16 +13,21 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
 
   ## now look at districts of what remains
   dists <- districts(graph)
-  subgrs <- lapply(dists, function(x) graph[x])
-  if (!r) {
+  if (r) {
+    subgrs <- lapply(dists, function(x) graph[x])
+  }
+  else {
+    subgrs <- vector(mode="list", length=length(dists))
     for (d in seq_along(dists)) {
-      for (i in dists[[d]]) {
-        des <- MixedGraphs::pathConnected(graph[anc(graph, dists[[d]])], i, 
-                                          setdiff(dists[[d]], i), 
-                                          etype="directed", dir=-1)
-        addE <- eList(lapply(des, function(x) c(i,x)))
-        subgrs[[d]] <- addEdges(subgrs[[d]], directed=addE)
-      }
+      subgrs[[d]] <- latentProject(graph, v = dists[[d]], only_directed = TRUE)
+      # for (i in dists[[d]]) {
+      # 
+      #   des <- MixedGraphs::pathConnected(graph[anc(graph, dists[[d]])], i, 
+      #                                     setdiff(dists[[d]], i), 
+      #                                     etype="directed", dir=-1)
+      #   addE <- eList(lapply(des, function(x) c(i,x)))
+      #   subgrs[[d]] <- addEdges(subgrs[[d]], directed=addE)
+      # }
     }
   }
   
@@ -33,9 +38,10 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
     return(out)
   }
   
+  ## get a topological order
   topOrd <- topologicalOrder(graph)
-  ## get initial segment districts
   
+  ## get initial segment districts according to topOrd
   initDistGrs <- lapply(seq_along(subgrs), function(x) {
     subTopOrd <- intersect(topOrd, subgrs[[x]]$v)
     lapply(seq_along(subTopOrd), 
@@ -51,25 +57,6 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
   }))
   initDistGrs <- initDistGrs[ord]
   
-  # dists <- districts(graph)
-  # int <- dists
-  
-  # if (r) {
-  #   # out <- lapply(dists, function(x) intSets(graph[x], topOrd))
-  #   out <- mapply(function(x,y) intSets(graph[x], y, topOrd), dists, topOrd, SIMPLIFY = FALSE)
-  # }
-  # else {
-  #   subgrs <- lapply(dists, function(x) graph[x])
-  #   for (d in seq_along(dists)) {
-  #     for (i in dists[[d]]) {
-  #       des <- MixedGraphs:::find_and_stop(graph[anc(graph, dists[[d]])], i, 
-  #                                          setdiff(dists[[d]], i), 
-  #                                          etype="directed", dir=-1)
-  #       addE <- eList(lapply(des, function(x) c(i,x)))
-  #       subgrs[[d]] <- addEdges(subgrs[[d]], directed=addE)
-  #     }
-  #   }
-    
   ## now obtain intrinsic sets
   out <- mapply(function(x,y) intSets(x, y, topOrd, r=r), initDistGrs, topOrd, SIMPLIFY = FALSE)
     # out <- lapply(subgrs, intSets, topOrd)
@@ -99,9 +86,10 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
 intSets <- function(graph, nt_rmv, topOrd, r=TRUE) {
   # print(graph$v)
   ## see which vertices can be removed
-  rmv <- match(setdiff(sterile(graph), nt_rmv), topOrd)
-  if (length(rmv) == 0) return(list(graph$v))
   max_v <- last(nt_rmv)
+  rmv <- match(setdiff(sterile(graph[dis(graph, max_v)]), nt_rmv), topOrd)
+  if (length(rmv) == 0) return(list(graph$v))
+
 
   # if (r) {
     dists <- lapply(seq_along(rmv), 
@@ -131,7 +119,7 @@ intSets <- function(graph, nt_rmv, topOrd, r=TRUE) {
     nt_rmv_list <- mapply(function(i,x) intersect(topOrd[seq_len(length(topOrd)-rmv[i])+rmv[i]], anc(graph, x)),
                         seq_along(rmv), dists, SIMPLIFY = FALSE)
     grs <- lapply(dists, function(x) latentProject(graph, v=x, only_directed = TRUE))
-    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(x,y,topOrd,r=TRUE), grs, nt_rmv_list, SIMPLIFY = FALSE))
+    out <- c(list(list(graph$v)), mapply(function(x,y) intSets(x,y,topOrd,r=FALSE), grs, nt_rmv_list, SIMPLIFY = FALSE))
   }
   # graph2 <- graph[-graph$v[rmv]]
   # graph2 <- graph[dis(graph, max_v)]
