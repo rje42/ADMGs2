@@ -4,7 +4,7 @@
 \alias{is_MAG}
 \title{Check if a graph is maximal and ancestral}
 \usage{
-is_MAG(graph)
+is_MAG(graph, directed = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}

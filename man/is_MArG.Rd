@@ -10,10 +10,12 @@ is_arid(graph)
 
 is_maximal(graph, check = TRUE, ancestral)
 
-is_MArG(graph)
+is_MArG(graph, directed = FALSE)
 }
 \arguments{
 \item{graph}{summary graph or ADMG of class \code{mixedgraph}}
+
+\item{directed}{logical: if \code{TRUE}, undirected edges are not allowed}
 }
 \description{
 Check if a graph is maximal and arid

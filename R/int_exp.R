@@ -20,6 +20,7 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
     subgrs <- vector(mode="list", length=length(dists))
     for (d in seq_along(dists)) {
       subgrs[[d]] <- latentProject(graph, v = dists[[d]], only_directed = TRUE)
+      
       # for (i in dists[[d]]) {
       # 
       #   des <- MixedGraphs::pathConnected(graph[anc(graph, dists[[d]])], i, 
@@ -46,8 +47,10 @@ intrinsicSets3 <- function (graph, r=TRUE, by_district=FALSE, sort=1, safe=FALSE
     subTopOrd <- intersect(topOrd, subgrs[[x]]$v)
     lapply(seq_along(subTopOrd), 
            function(i) {
-             tmp <- subgrs[[x]][subTopOrd[seq_len(i)]]
-             tmp[dis(tmp, subTopOrd[i])]
+             vs <- intersect(subTopOrd[seq_len(i)], dis(subgrs[[x]],subTopOrd[i]))
+             tmp <- subgrs[[x]][vs]
+             if (r) tmp[dis(tmp, subTopOrd[i])]
+             else latentProject(tmp, latent=setdiff(graph$v, dis(tmp, subTopOrd[i])), only_directed = TRUE)
            })
   })
   initDistGrs <- unlist(initDistGrs, recursive = FALSE)
