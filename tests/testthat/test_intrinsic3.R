@@ -15,6 +15,12 @@ int6cyc <- intrinsicSets3(graphCr("2 <-> 1 <-> 3 <-> 4 <-> 6 <-> 5 <-> 2"), r=FA
 int7_601a <- intrinsicSets(graphCr("2 <- 7 <- 5 <-> 3 <-> 6 <-> 2 <-> 4 -> 1 <-> 5, 7 <-> 1,  6 -> 4"), r=FALSE, sort=3)
 int7_601 <- intrinsicSets3(graphCr("2 <- 7 <- 5 <-> 3 <-> 6 <-> 2 <-> 4 -> 1 <-> 5, 7 <-> 1,  6 -> 4"), r=FALSE, sort=3)
 
+gr7 <- graphCr("6 <-> 4 <- 1 <-> 2 <-> 3 -> 7 <-> 2 -> 5 <-> 4 <-> 2, 5 <-> 7")
+int7_ord3 <- intrinsicSets3(gr7, r=FALSE, sort=3)
+int7_ord1 <- intrinsicSets(gr7, r=FALSE, sort=3)
+int7_ord3r <- intrinsicSets3(gr7, r=TRUE, sort=3)
+int7_ord1r <- intrinsicSets(gr7, r=TRUE, sort=3)
+
 test_that("intrinsicSets3 works OK", {
   expect_equal(int1r, list(1, 2, 3, 4, 5, 4:5, c(2,4,5), 3:5, 2:5, 1:5))
   expect_equal(int1, list(1, 2, 3, 4, 5, 4:5, c(2,4,5), 3:5, 2:5, 1:5))
@@ -39,6 +45,8 @@ test_that("intrinsicSets3 works OK", {
                               c(3L, 6L), c(2L, 4L, 6L), c(3L, 5L, 6L), c(1L, 3L, 5L, 6L
                               ), c(2L, 3L, 5L, 6L), 2:6, 7L, c(1L, 5L, 7L), c(1L, 3L, 5L, 
                                                                               6L, 7L), 1:7))
+  expect_equal(int7_ord1, int7_ord3)
+  expect_equal(int7_ord1r, int7_ord3r)
 })
 
 # test_that("intrinsicSets works OK for CADMGs", {

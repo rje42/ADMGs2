@@ -33,9 +33,11 @@ as.ci <- function(x, ...) {
 ##' 
 ##' @exportS3Method print ci
 print.ci <- function(x, ...) {
-  cat(x[[1]], sep=", ")
+  if (length(x[[1]]) > 0) cat(x[[1]], sep=", ")
+  else cat("(empty)")
   cat(" _||_ ")
-  cat(x[[2]], sep=", ")
+  if (length(x[[2]]) > 0) cat(x[[2]], sep=", ")
+  else cat("(empty)")
   if (length(x[[3]]) > 0) {
     cat(" | ")
     cat(x[[3]], sep=", ")
