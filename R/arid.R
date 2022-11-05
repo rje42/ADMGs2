@@ -112,7 +112,7 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
 
 ##' @describeIn is_MArG check if a graph is arid
 ##' @export
-is_arid <- function(graph){
+is_arid <- function(graph) {
   
   if (!is_SG(graph)) return(FALSE)
   vs <- intersect(ch(graph, graph$v), sib(graph, graph$v))
@@ -196,51 +196,82 @@ is_MArG <- function(graph, directed=FALSE) {
 ##' Check if a directed mixed graph is ancestral
 ##' 
 ##' @param graph object of class \code{mixedgraph}
+##' @param top_ord optionally, a topological order
+##' @param .top_ord logical: should topological order be returned if computed?
 ##' 
 ##' @details \code{graph} should only contain directed and
 ##' bidirected edges.
 ##' 
 ##' @export
-is_ancestral <- function(graph) {
+is_ancestral <- function(graph, top_ord, .top_ord) {
   
   ## check no arrows point to an undirected edge
   un_g <- un(graph)
   if (length(un_g) > 0) {
     check_un <- any(ch(graph, graph$v) %in% un_g) || any(sib(graph, graph$v) %in% un_g)
-    if (check_un) return(FALSE)
+    if (check_un) {
+      out <- FALSE
+      if (.top_ord) {
+        attr(out, "top_ord") <- NA
+        attr(out, "top_ord_code") <- 2
+      }
+      return(out)
+    }
   }
   
   ## if graph is cyclic, return FALSE, otherwise get topological order
-  vs <- topologicalOrder(graph, warn=FALSE)
-  if (is.na(vs[1])) return(FALSE)
+  if (missing(top_ord)) vs <- topologicalOrder(graph, warn=FALSE)
+  else vs <- top_ord
+  if (is.na(vs[1])) {
+    out <- FALSE
+    if (.top_ord) {
+      attr(out, "top_ord") <- NA
+      attr(out, "top_ord_code") <- 1
+    }
+    return(out)
+  }
 
+  ## get output
+  out <- TRUE
+  if (.top_ord) {
+    attr(out, "top_ord") <- vs
+    attr(out, "top_ord_code") <- 0
+  }
   
   ## now check for siblings amongst ancestors
   ancs <- vector(mode="list", length=length(vnames(graph)))
   
   for (v in vs) {
     ancs[[v]] <- c(v, unlist(ancs[pa(graph, v)]))
-    if (any(sib(graph, v) %in% ancs[[v]])) return(FALSE)
+    if (any(sib(graph, v) %in% ancs[[v]])) {
+      out <- FALSE
+      return(out)
+    }
   }
   
-  return(TRUE)
+  return(out)
 }
 
 
 ##' Check if a graph is maximal and ancestral
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
+##' @param directed logical: should this be a directed MAG?
+##' @param .top_ord logical: if computed by ancestral should topological order be returned?
 ##' 
-##' @details Runs \code{is_ancestral} and then 
-##' \code{is_maximal}, reports the success of both 
-##' or the failure of either.
+##' @details Checks edge types, and then runs \code{is_ancestral} and 
+##' \code{is_maximal}, reports the success of both or the failure of either.
 ##' 
 ##' @export
-is_MAG <- function(graph, directed=FALSE) {
+is_MAG <- function(graph, directed=FALSE, .top_ord=FALSE) {
   if (directed && nedge(graph, "undirected") > 0) return(FALSE)
   else if (nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected")) > 0)) return(FALSE)
   
-  ancestral <- is_ancestral(graph)
-  if (!ancestral) return(FALSE)
-  else return(is_maximal(graph, check=FALSE, ancestral=ancestral))
+  ancestral <- is_ancestral(graph, .top_ord=.top_ord)
+  if (!ancestral) return(ancestral)
+  
+  out <- is_maximal(graph, check=FALSE, ancestral=ancestral)
+  if (.top_ord) attributes(out) <- attributes(ancestral)
+  
+  return(out)
 }
