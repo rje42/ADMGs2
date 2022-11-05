@@ -229,3 +229,18 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   out
 }
 
+he_val <- function (graph, skel=TRUE) {
+  n <- nv(graph)
+  if (nv(graph) > 7) stop("Only works for graphs with at most 7 vertices")
+  ## also doesn't work if n=7 and skel=TRUE...
+  ssr <- subsetRep(graph, max_size = 3, r = FALSE, sort = 2)
+  if (skel) {
+    ssr <- ssr[lengths(ssr) >= 2]
+    return(sum(2^(setmatch(ssr, c(combn(n, 2, simplify = FALSE), 
+                                  combn(n, 3, simplify = FALSE)))-1)))
+  }
+  else {
+    ssr <- ssr[lengths(ssr) == 3]
+    return(sum(2^(setmatch(ssr, combn(n, 3, simplify = FALSE))-1)))
+  }
+}
