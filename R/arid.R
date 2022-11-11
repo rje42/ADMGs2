@@ -62,7 +62,7 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
     
     dir_adj_out <- withAdjMatrix(gr_out[etype="directed"])$edges$directed
   }
-  else dir_adj_out <- adjMatrix(n)
+  else dir_adj_out <- adjMatrix(n=n)
   
   if (nedge(graph, "bidirected") > 0) {
     ## fill in bidirected edges not replaced by directed edges
@@ -203,7 +203,7 @@ is_MArG <- function(graph, directed=FALSE) {
 ##' bidirected edges.
 ##' 
 ##' @export
-is_ancestral <- function(graph, top_ord, .top_ord) {
+is_ancestral <- function(graph, top_ord, .top_ord=FALSE) {
   
   ## check no arrows point to an undirected edge
   un_g <- un(graph)
