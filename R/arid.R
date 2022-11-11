@@ -62,7 +62,7 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
     
     dir_adj_out <- withAdjMatrix(gr_out[etype="directed"])$edges$directed
   }
-  else dir_adj_out <- adjMatrix(n)
+  else dir_adj_out <- adjMatrix(n=n)
   
   if (nedge(graph, "bidirected") > 0) {
     ## fill in bidirected edges not replaced by directed edges
