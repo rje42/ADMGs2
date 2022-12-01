@@ -2,9 +2,12 @@
 % Please edit documentation in R/arid.R
 \name{aridProj}
 \alias{aridProj}
-\title{Compute the (maximal) arid projection of a graph}
+\alias{ancProj}
+\title{Compute the (maximal) arid or ancestral projection of a graph}
 \usage{
 aridProj(graph, maximal = TRUE, verbose = FALSE)
+
+ancProj(graph, maximal = TRUE, directed = FALSE)
 }
 \arguments{
 \item{graph}{an ADMG as an object of class \code{mixedgraph}}
@@ -12,15 +15,32 @@ aridProj(graph, maximal = TRUE, verbose = FALSE)
 \item{maximal}{should the projection computed be maximal?}
 
 \item{verbose}{logical: should additional output be given?}
+
+\item{directed}{logical: is graph an ADMG?}
 }
 \description{
-Compute the (maximal) arid projection of a graph
+Compute the (maximal) arid or ancestral projection of a graph
 }
 \details{
-Algorithm: compute the intrinsic closure of every 
+The input graph should be a summary graph for \code{ancProj},
+and an ADMG for \code{aridProj}. 
+
+Algorithm for \code{aridProj()}: compute the intrinsic closure of every 
 vertex. Use this to obtain directed edges. Then add in bidirected
 edges for vertices not already adjacent.  Then go through pairs
 and check if intrinsic closures are joined by a bidirected edge.
+
+Algorithm for \code{ancProj()}: go through in a topological order and check
+no siblings are among ancestors.  If there are at say \code{v}, then look for parents and 
+siblings, recursively if the latter are also ancestors.  Remove any bidirected
+edges from discovered vertices to \code{v} and add directed edges from them
+to \code{v}
+
 If maximal graph asked for, then also check intrinsic closures
 of the pairs.
 }
+\section{Functions}{
+\itemize{
+\item \code{ancProj()}: obtain ancestral projection
+
+}}

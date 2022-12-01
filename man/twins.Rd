@@ -28,6 +28,6 @@ Some datasets for illustration.
 \item \code{gss}: Data from the General Social Survey
 
 \item \code{gss_small}: Subset of data from the General Social Survey
-}}
 
+}}
 \keyword{datasets}

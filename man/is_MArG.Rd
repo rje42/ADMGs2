@@ -26,8 +26,8 @@ using the functions \code{is_arid} and \code{is_maximal}.
 }
 \section{Functions}{
 \itemize{
-\item \code{is_arid}: check if a graph is arid
+\item \code{is_arid()}: check if a graph is arid
 
-\item \code{is_maximal}: check if graph is maximal
+\item \code{is_maximal()}: check if graph is maximal
+
 }}
-

@@ -28,6 +28,6 @@ returns integer value of heads from provided list
 }
 \section{Functions}{
 \itemize{
-\item \code{factorize0}: Give factorization of heads and tails
-}}
+\item \code{factorize0()}: Give factorization of heads and tails
 
+}}

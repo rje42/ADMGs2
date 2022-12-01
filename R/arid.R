@@ -1,13 +1,23 @@
-##' Compute the (maximal) arid projection of a graph
+##' Compute the (maximal) arid or ancestral projection of a graph
 ##' 
 ##' @param graph an ADMG as an object of class \code{mixedgraph}
 ##' @param maximal should the projection computed be maximal?
 ##' @param verbose logical: should additional output be given?
 ##' 
-##' @details Algorithm: compute the intrinsic closure of every 
+##' @details The input graph should be a summary graph for \code{ancProj},
+##' and an ADMG for \code{aridProj}. 
+##' 
+##' Algorithm for \code{aridProj()}: compute the intrinsic closure of every 
 ##' vertex. Use this to obtain directed edges. Then add in bidirected
 ##' edges for vertices not already adjacent.  Then go through pairs
 ##' and check if intrinsic closures are joined by a bidirected edge.
+##' 
+##' Algorithm for \code{ancProj()}: go through in a topological order and check
+##' no siblings are among ancestors.  If there are at say \code{v}, then look for parents and 
+##' siblings, recursively if the latter are also ancestors.  Remove any bidirected
+##' edges from discovered vertices to \code{v} and add directed edges from them
+##' to \code{v}
+##' 
 ##' If maximal graph asked for, then also check intrinsic closures
 ##' of the pairs.
 ##' 
@@ -109,7 +119,10 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
   return(gr_out)
 }
 
-ancProj <- function (graph, directed=FALSE) {
+##' @describeIn aridProj obtain ancestral projection
+##' @param directed logical: is graph an ADMG?
+##' @export
+ancProj <- function (graph, maximal=TRUE, directed=FALSE) {
   if (nv(graph) <= 1) return(graph)
   if (!directed && !is_SG(graph)) stop("'graph' must be a summary graph of class 'mixedgraph'")
   else if (directed && !is_ADMG(graph)) stop("'graph' must be an ADMG graph of class 'mixedgraph'")
@@ -161,6 +174,25 @@ ancProj <- function (graph, directed=FALSE) {
     # addEdges(graph, )
   }
 
+  if (maximal && nedge(graph, "bidirected") > 0) {
+    dists <- districts(graph)
+    len_d <- lengths(dists)
+    to_add <- list()
+    for (d in which(len_d > 2)) {
+      combn(dists[[d]], 2, simplify = FALSE)
+      
+      for (i in seq_along(dists[[d]][-1])) for (j in seq_len(i-1)) { 
+        i1 <- dists[[d]][i]; j1 <- dists[[d]][j]
+        if (!(i1 %in% adj(graph, j1))) {
+          if (j1 %in% dis(graph[union(ancs[[i1]], ancs[[j1]])], i1)) {
+            to_add <- c(to_add, list(c(i1,j1)))
+          }
+        }
+      }
+    }
+    graph <- addEdges(graph, bidirected=eList(to_add))
+  }
+  
   return(graph)
 }
 

@@ -36,6 +36,6 @@ and their dis-tails.
 }
 \section{Functions}{
 \itemize{
-\item \code{intrinsicSets2}: Alternative method for non-recursive heads only
-}}
+\item \code{intrinsicSets2()}: Alternative method for non-recursive heads only
 
+}}

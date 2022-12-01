@@ -4,16 +4,19 @@
 \alias{is_MAG}
 \title{Check if a graph is maximal and ancestral}
 \usage{
-is_MAG(graph, directed = FALSE)
+is_MAG(graph, directed = FALSE, .top_ord = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
+
+\item{directed}{logical: should this be a directed MAG?}
+
+\item{.top_ord}{logical: if computed by ancestral should topological order be returned?}
 }
 \description{
 Check if a graph is maximal and ancestral
 }
 \details{
-Runs \code{is_ancestral} and then 
-\code{is_maximal}, reports the success of both 
-or the failure of either.
+Checks edge types, and then runs \code{is_ancestral} and 
+\code{is_maximal}, reports the success of both or the failure of either.
 }

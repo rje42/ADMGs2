@@ -25,6 +25,6 @@ Factorize a set of nodes into heads and tails
 }
 \section{Functions}{
 \itemize{
-\item \code{partition}: Return the partition function for a particular set of vertices
-}}
+\item \code{partition()}: Return the partition function for a particular set of vertices
 
+}}

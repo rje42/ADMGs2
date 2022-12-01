@@ -85,3 +85,9 @@
 ##' @format A mixed graph object that is also an ADMG.
 ##' 
 "grCounter"
+
+##' The 'gadget' graph
+##' 
+##' @format An ancestral graph that is not maximal.
+##' 
+"grGadget"

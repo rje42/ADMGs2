@@ -4,10 +4,14 @@
 \alias{is_ancestral}
 \title{Check if a directed mixed graph is ancestral}
 \usage{
-is_ancestral(graph)
+is_ancestral(graph, top_ord, .top_ord = FALSE, directed = FALSE, .anc = FALSE)
 }
 \arguments{
 \item{graph}{object of class \code{mixedgraph}}
+
+\item{top_ord}{optionally, a topological order}
+
+\item{.top_ord}{logical: should topological order be returned if computed?}
 }
 \description{
 Check if a directed mixed graph is ancestral

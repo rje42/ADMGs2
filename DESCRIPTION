@@ -1,6 +1,6 @@
 Package: ADMGs2
 Title: Functions for Describing and Fitting Discrete Mixed Graphs
-Version: 0.5.9
+Version: 0.5.10
 Authors@R: c(
   person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre")),
   person("Ilya", "Shpitser", , "ilyas@cs.jhu.edu", role = c("aut")))
@@ -16,7 +16,7 @@ Imports: Matrix,
          utils,
 License: GPL-2
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
 Suggests: 
     testthat,
     knitr,

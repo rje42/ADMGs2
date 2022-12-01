@@ -17,6 +17,6 @@ Get vector of fixed or random nodes in CADMG
 }
 \section{Functions}{
 \itemize{
-\item \code{fixed}: get fixed nodes
-}}
+\item \code{fixed()}: get fixed nodes
 
+}}
