@@ -109,6 +109,60 @@ aridProj <- function (graph, maximal=TRUE, verbose=FALSE) {
   return(gr_out)
 }
 
+ancProj <- function (graph, directed=FALSE) {
+  if (nv(graph) <= 1) return(graph)
+  if (!directed && !is_SG(graph)) stop("'graph' must be a summary graph of class 'mixedgraph'")
+  else if (directed && !is_ADMG(graph)) stop("'graph' must be an ADMG graph of class 'mixedgraph'")
+  is_anc <- is_ancestral(graph, .top_ord = TRUE, .anc = TRUE)
+
+  ## extract side information from is_ancestral()
+  top_ord <- attr(is_anc, "top_ord")
+  ancs <- attr(is_anc, "ancs")
+  
+  while (!is_anc) {
+    ## find vertex that is not ancestral
+    v <- attr(is_anc, "which")
+    # wh <- which.min(c(lengths(ancs[top_ord]))
+    # v <- top_ord[wh]
+    gr <- graph[top_ord[seq_len(match(v, top_ord))]]
+    ## get its sibling-ancestors
+    viol <- intersect(sib(gr, v), ancs[[v]])
+    pas <- pa(gr, viol)
+    sbs <- setdiff(sib(gr, viol), c(viol,v))
+
+    ## set up loop to obtain all vertices with edges into v
+    sbs_a <- new <- intersect(sbs, ancs[[v]])  ## get cases where siblings are also ancestors
+    sbs_n <- setdiff(sbs, sbs_a)
+    all_a <- c(viol, sbs_a, pas)
+    all_n <- sbs_n
+    
+    while (length(new) > 0) {
+      # new <- setdiff(sib(gr, sbs_a), all)  ## get cases where siblings are also ancestors
+      new_sbs <- setdiff(sib(gr, sbs_a), c(all_a, all_n))
+      new <- intersect(new_sbs, ancs[[v]])
+      all_a <- c(all_a, new)
+      all_n <- c(all_n, setdiff(new_sbs, new))
+      new_pa <- setdiff(pa(gr, sbs_a), c(all_a, all_n))
+      all_a <- c(all_a, new_pa)
+    }
+    
+    ## now add in new edges and remove old ones
+    graph <- addEdges(graph, makeEdgeList(directed=eList(lapply(all_a, function(x) c(x,v)))))
+    graph <- removeEdges(graph, makeEdgeList(bidirected=eList(lapply(all_a, function(x) c(x,v)))), force = TRUE)
+    graph <- addEdges(graph, makeEdgeList(bidirected=eList(lapply(all_n, function(x) c(x,v)))))
+    
+    ## check if graph is now ancestral
+    is_anc <- is_ancestral(graph, top_ord=top_ord, .anc=TRUE)
+    ancs <- attr(is_anc, "ancs")
+    
+    ## add in directed edges viol and pas -> v
+    ## add in directed edges for sbs -> v if an ancestor (does this necessitate recursive approach?)
+    ## add in bidirected edges for sbs <-> v if not an ancestor
+    # addEdges(graph, )
+  }
+
+  return(graph)
+}
 
 ##' @describeIn is_MArG check if a graph is arid
 ##' @export
@@ -203,30 +257,35 @@ is_MArG <- function(graph, directed=FALSE) {
 ##' bidirected edges.
 ##' 
 ##' @export
-is_ancestral <- function(graph, top_ord, .top_ord=FALSE) {
+is_ancestral <- function(graph, top_ord, .top_ord=FALSE, directed=FALSE, .anc=FALSE) {
   
   ## check no arrows point to an undirected edge
-  un_g <- un(graph)
-  if (length(un_g) > 0) {
-    check_un <- any(ch(graph, graph$v) %in% un_g) || any(sib(graph, graph$v) %in% un_g)
-    if (check_un) {
-      out <- FALSE
-      if (.top_ord) {
-        attr(out, "top_ord") <- NA
-        attr(out, "top_ord_code") <- 2
+  if (!directed) {
+    un_g <- un(graph)
+    if (length(un_g) > 0) {
+      check_un <- any(ch(graph, graph$v) %in% un_g) || any(sib(graph, graph$v) %in% un_g)
+      if (check_un) {
+        out <- FALSE
+        if (.top_ord) {
+          attr(out, "top_ord") <- NA
+          attr(out, "top_ord_code") <- 2
+        }
+        return(out)
       }
-      return(out)
     }
   }
-  
   ## if graph is cyclic, return FALSE, otherwise get topological order
   if (missing(top_ord)) vs <- topologicalOrder(graph, warn=FALSE)
   else vs <- top_ord
+  
   if (is.na(vs[1])) {
     out <- FALSE
     if (.top_ord) {
       attr(out, "top_ord") <- NA
       attr(out, "top_ord_code") <- 1
+    }
+    if (.anc) {
+      attr(out, "ancs") = NA
     }
     return(out)
   }
@@ -243,8 +302,11 @@ is_ancestral <- function(graph, top_ord, .top_ord=FALSE) {
   
   for (v in vs) {
     ancs[[v]] <- c(v, unlist(ancs[pa(graph, v)]))
+    if (.anc) attr(out, "ancs") = ancs
+    
     if (any(sib(graph, v) %in% ancs[[v]])) {
-      out <- FALSE
+      attr(out, "which") = v
+      out[] <- FALSE
       return(out)
     }
   }
