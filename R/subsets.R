@@ -217,13 +217,12 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   }
   
   if (sort > 1) {
-    out <- lapply(out, sort.default)
+    out <- lapply(out, sort.int)
   }
   if (sort > 2) {
     fn <- sapply(out, function(x) sum(2^(x-1)))
     if (any(duplicated(fn))) stop("There should not be a duplication, but something appears twice")
     out <- out[order(fn)]
-    out <- lapply(out, sort.int)
   }
   
   out

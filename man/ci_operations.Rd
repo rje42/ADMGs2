@@ -22,8 +22,8 @@ Operations on conditional independence objects
 }
 \section{Functions}{
 \itemize{
-\item \code{split_ci}: Split conditional independences into univariate pieces
+\item \code{split_ci()}: Split conditional independences into univariate pieces
 
-\item \code{standardize_cis}: Standardize conditional independences
+\item \code{standardize_cis()}: Standardize conditional independences
+
 }}
-
