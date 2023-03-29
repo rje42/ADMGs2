@@ -8,12 +8,14 @@
 \usage{
 is_arid(graph)
 
-is_maximal(graph, check = TRUE, ancestral)
+is_maximal(graph, check = TRUE, ancestral, failure = FALSE)
 
-is_MArG(graph, directed = FALSE)
+is_MArG(graph, directed = FALSE, failure = FALSE)
 }
 \arguments{
 \item{graph}{summary graph or ADMG of class \code{mixedgraph}}
+
+\item{failure}{logical: if graph is not maximal, should missing edge be returned?}
 
 \item{directed}{logical: if \code{TRUE}, undirected edges are not allowed}
 }

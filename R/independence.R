@@ -225,6 +225,33 @@ indep_implies <- function(I1, I2) {
   return(TRUE)
 }
 
+##' Group independences using an ordering
+##' 
+##' @param I a list of \code{ci} objects
+##' 
+##' @export
+group_indeps <- function (I) {
+  As <- lapply(I, `[[`, 1)
+  Bs <- lapply(I, `[[`, 2)
+  null <- lengths(As) == 0 | lengths(Bs) == 0
+  if (any(null)) {
+    I <- I[!null]
+    As <- As[!null]
+    Bs <- Bs[!null]
+  }
+  
+  ## should only be a single element in each set A
+  if (any(lengths(As) > 1)) {
+    message("Independences not in the correct form")
+    return(NULL)
+  }
+  
+  out <- tapply(I, INDEX = unlist(As), c, simplify = FALSE)
+  names(out) <- NULL
+  
+  out
+}
+
 # ## Remove redundancy in list of independences
 # rmvRed <- function(I) {
 #   ulI <- lapply(I, function(x) sort.int(unlist(x)))

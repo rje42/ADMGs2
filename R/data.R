@@ -91,3 +91,12 @@
 ##' @format An ancestral graph that is not maximal.
 ##' 
 "grGadget"
+
+##' The triskelion graph
+##' 
+##' @format A maximal ancestral graph
+##' 
+##' This is a graph with a head of size three (4,5,6) such that no subset of 
+##' size 2 is also a head.
+##' 
+"gr3head"

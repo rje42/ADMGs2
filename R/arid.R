@@ -213,7 +213,7 @@ is_arid <- function(graph) {
 
 ##' @describeIn is_MArG check if graph is maximal
 ##' @export
-is_maximal <- function(graph, check=TRUE, ancestral) {
+is_maximal <- function(graph, check=TRUE, ancestral, failure=FALSE) {
   
   if (check) {
     if (!is_SG(graph)) {
@@ -250,7 +250,11 @@ is_maximal <- function(graph, check=TRUE, ancestral) {
         for (j in setdiff(v[seq_len(k-1)], adj(graph, i))) {
           ## look at pairs of non-adjacent vertices
           intClo <- intrinsicClosure(graph, c(i, j))
-          if (j %in% dis(graph[intClo], i)) return(FALSE)
+          if (j %in% dis(graph[intClo], i)) {
+            out <- FALSE
+            if (failure) attr(out, "failure") <- c(i,j)
+            return(out)
+          }
         }
       }
     }
@@ -264,19 +268,20 @@ is_maximal <- function(graph, check=TRUE, ancestral) {
 ##' 
 ##' @param graph summary graph or ADMG of class \code{mixedgraph}
 ##' @param directed logical: if \code{TRUE}, undirected edges are not allowed
+##' @param failure logical: if graph is not maximal, should missing edge be returned?
 ##' 
 ##' @details Checks if the graph is both maximal and arid
 ##' using the functions \code{is_arid} and \code{is_maximal}.
 ##' 
 ##' @export
-is_MArG <- function(graph, directed=FALSE) {
+is_MArG <- function(graph, directed=FALSE, failure=FALSE) {
   if (directed && nedge(graph, "undirected") > 0) return(FALSE)
   else if (nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected")) > 0)) return(FALSE)
   
   if(!is_arid(graph)) return(FALSE)
-  if(!is_maximal(graph, check=FALSE)) return(FALSE)
-
-  return(TRUE)
+  out <- is_maximal(graph, check=FALSE, failure=failure)
+  
+  return(out)
 }
 
 ##' Check if a directed mixed graph is ancestral

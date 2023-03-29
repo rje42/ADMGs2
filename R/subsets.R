@@ -243,3 +243,65 @@ he_val <- function (graph, skel=TRUE) {
     return(sum(2^(setmatch(ssr, combn(n, 3, simplify = FALSE))-1)))
   }
 }
+
+##' Get sets constrained by a conditional independence
+##' 
+##' @param ci a conditional independence or list of \code{ci} objects
+##' @param check logical: should validity of \code{ci} be checked?
+##' 
+##' @export
+constr_sets <- function (ci, sort=1, max=Inf, check=TRUE) {
+  
+  if (length(ci) == 0) return(integer(0))
+  
+  ## deal with a list of CIs first
+  if (is.list(ci[[1]])) {
+    return(lapply(ci, constr_sets, sort=sort, max=max, check=check))
+  }
+  
+  ## make into a ci object
+  if (class(ci) != "ci") ci <- as.ci(ci)
+  ## check if requested
+  if (check) {
+    if (length(intersect(ci[[1]], ci[[2]])) > 0) stop("Independent sets should not overlap")
+    ci[[1]] <- setdiff(ci[[1]], ci[[3]])
+    ci[[2]] <- setdiff(ci[[2]], ci[[3]])
+  }
+  
+  out <- list()
+  if (is.finite(max)) sz <- list()
+  ## use kronecker to obtain indices for subsets
+  for (i in 1:3) {
+    out[[i]] <- 0
+    if (is.finite(max)) sz[[i]] <- 0
+    
+    for (j in seq_along(ci[[i]])) {
+      ## add in representation of jth element of set
+      out[[i]] <- kronecker(c(0,2^(ci[[i]][j] - 1)), out[[i]], "+")
+      if (is.finite(max)) {
+        sz[[i]] <- kronecker(0:1, sz[[i]], "+")
+        out[[i]] <- out[[i]][sz[[i]] <= max]
+        sz[[i]] <- sz[[i]][sz[[i]] <= max]
+      }
+    }
+    if (i < 3) {
+      out[[i]] <- out[[i]][-1]
+      if (is.finite(max)) sz[[i]] <- sz[[i]][-1]
+    }
+  }
+  
+  ## combine to obtain representation of final sets
+  out_full <- kronecker(out[[3]], kronecker(out[[2]], out[[1]], "+"), "+")
+  if (is.finite(max)) {
+    osz <- kronecker(sz[[3]], kronecker(sz[[2]], sz[[1]], "+"), "+")
+    out_full <- out_full[osz <= max]
+    osz <- osz[osz <= max]
+  }
+  
+  if (sort > 0) {
+    ## if requested, sort the output
+    out_full <- sort.int(out_full)
+  }
+  
+  return(out_full)
+}

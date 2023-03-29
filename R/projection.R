@@ -18,6 +18,7 @@ latentProject <- function(graph, latent, v, only_directed=FALSE, sort=1) {
   if (missing(latent)) latent <- setdiff(graph$v, v)
   else latent <- intersect(graph$v, latent)
   
+  ## eliminate each latent variable
   for (l in latent) {
     new_dir <- new_bi <- adjList(n=length(graph$vnames))
     
@@ -26,8 +27,11 @@ latentProject <- function(graph, latent, v, only_directed=FALSE, sort=1) {
     if (only_directed) sibs <- integer(0)
     else sibs <- sib(graph, l)
     
-    new_dir[chs] <- list(pas)
-    if (sort > 1) new_dir <- mapply(function(x,y) sort.int(x), new_dir)
+    ## orient directed edges the correct way
+    if (packageVersion("MixedGraphs") < "1.0.0") new_dir[chs] <- list(pas)
+    else new_dir[pas] <- list(chs)
+    
+    if (sort > 1) new_dir <- lapply(new_dir, sort.int)
     if (!only_directed) {
       new_bi[chs] <- list(c(sibs, chs))
       new_bi[sibs] <- list(chs)
@@ -39,4 +43,36 @@ latentProject <- function(graph, latent, v, only_directed=FALSE, sort=1) {
   }
   
   return(graph)
+}
+
+##' Canonical DAG for an ADMG
+##' 
+##' @param graph ADMG of class \code{mixedgraph}
+##' @param collect logical: should cliques of bidirected edges become a single latent?
+##' 
+##' @export
+canonicalDAG <- function (graph, collect=TRUE) {
+  if (collect) {
+    lts <- cliques(skeleton(graph[etype="bidirected"]))
+    lts <- lts[lengths(lts) > 1]
+  }
+  else {
+    lts <- withEdgeList(graph[etype="bidirected"])$edges
+  }
+  
+  nl <- length(lts)
+  nv <- length(graph$vnames)
+  
+  new_dir <- c(rep(list(NULL), nv), lts)
+  class(new_dir) <- "adjList"
+  if (packageVersion("MixedGraphs") < "1.0.0") new_dir <- revAdjList(new_dir)  
+
+  ## form the graph
+  out <- addNodes(graph[etype="directed"], nl)
+  out <- addEdges(out, directed=new_dir)
+  
+  ## put latent variables first 
+  out <- out[c(nv + seq_len(nl), seq_len(nv)), order=TRUE]
+  
+  return(out)
 }
