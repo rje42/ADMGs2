@@ -62,7 +62,7 @@ opd <- function (graph, topOrd, v, include_empty=FALSE) {
     while (length(curr) > 0) {
       for (k in seq_along(curr)) {
         ## now go through each new graph and remove each barren vertex (other than vi)
-        for (l in setdiff(rev(barren(curr[[k]])), vi)) {
+        for (l in rev(setdiff(barren(curr[[k]]), vi))) {
           poss <- dis(curr[[k]][-l], vi, sort=2)
           ## if we already have it, then skip
           if (setmatch(list(poss), sec, nomatch = 0L) > 0) next
@@ -75,8 +75,8 @@ opd <- function (graph, topOrd, v, include_empty=FALSE) {
           
           v_lost <- setdiff(setdiff(curr[[k]]$v, l), last(curr2)[[1]]$v)
           if (include_empty || length(v_lost) > 0) {
-            poss_all2 <- setdiff(poss_all, vi)
-            indep <- c(indep, list(as.ci(vi, v_lost, setdiff(poss_all2, v_lost))))
+            poss_all2 <- setdiff(poss_all, c(v_lost, vi))
+            indep <- c(indep, list(as.ci(vi, v_lost, poss_all2)))
           }
         }
       }
