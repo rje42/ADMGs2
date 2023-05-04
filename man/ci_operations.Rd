@@ -6,12 +6,14 @@
 \alias{standardize_cis}
 \title{Operations for conditional independences}
 \usage{
-split_ci(cis)
+split_ci(cis, topOrd)
 
 standardize_cis(cis)
 }
 \arguments{
 \item{cis}{object of class \code{ci} or list thereof}
+
+\item{topOrd}{optional topological order to use in splitting decisions}
 }
 \value{
 A list with the relevant output in, one entry for each conditional 

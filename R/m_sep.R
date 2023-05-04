@@ -107,7 +107,7 @@ whSep <- function (graph, X, Z, check=TRUE) {
   }
   
   gr_m <- moralize(graph, c(X,Z))
-  out <- setdiff(Z, pathConnected(gr_m, X, Z, dir=0))
+  out <- setdiff(Z, pathConnected(gr_m[ant(gr_m, c(X,Z))], X, Z, dir=0))  ## maybe don't need the ant() here...
   
   return(out)
 }

@@ -117,9 +117,12 @@ localMarkovProperty <- function (graph, unique=TRUE, split=FALSE, ord) {
 NULL
 
 ##' @describeIn ci_operations Split conditional independences into univariate pieces
+##' @param topOrd optional topological order to use in splitting decisions
 ##' @export
-split_ci <- function (cis) {
+split_ci <- function (cis, topOrd) {
   if ("ci" %in% class(cis)) cis <- list(cis)
+  if (missing(topOrd)) to <- FALSE
+  else to <- TRUE
   
   new_indeps <- list()
   rmv <- integer(0)
@@ -129,6 +132,7 @@ split_ci <- function (cis) {
     if (length(cis[[i]][[2]]) > 1) {
       vnew_indeps <- vector(mode="list", length=length(cis[[i]][[2]]))
       cond <- cis[[i]][[3]]
+      if (to) cis[[i]][[2]] <- topOrd[sort.int(match(cis[[i]][[2]], topOrd))]
       for (j in seq_along(cis[[i]][[2]])) {
         vnew_indeps[[j]] <- list(cis[[i]][[1]], cis[[i]][[2]][j], cond)
         cond <- c(cond, cis[[i]][[2]][j])
@@ -149,6 +153,7 @@ split_ci <- function (cis) {
     if (length(cis[[i]][[1]]) > 1) {
       vnew_indeps <- vector(mode="list", length=length(cis[[i]][[1]]))
       cond <- cis[[i]][[3]]
+      if (to) cis[[i]][[1]] <- topOrd[sort.int(match(cis[[i]][[1]], topOrd))]
       for (j in seq_along(cis[[i]][[1]])) {
         vnew_indeps[[j]] <- list(cis[[i]][[1]][j], cis[[i]][[2]], cond)
         cond <- c(cond, cis[[i]][[1]][j])
