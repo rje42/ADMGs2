@@ -4,7 +4,7 @@
 ##' discrete DAG model that is Markov with respect to the
 ##' graph.
 ##' 
-##' @param n a DAG object of class \code{mixedgraph}
+##' @param n number of distributions to simulate
 ##' @param graph a DAG object of class \code{mixedgraph}
 ##' @param dims integer vector of dimensions of distribution
 ##' @param alpha parameter to use in Dirichlet distribution

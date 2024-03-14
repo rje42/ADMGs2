@@ -4,12 +4,14 @@
 \alias{canonicalDAG}
 \title{Canonical DAG for an ADMG}
 \usage{
-canonicalDAG(graph, collect = TRUE)
+canonicalDAG(graph, collect = TRUE, where = 1)
 }
 \arguments{
 \item{graph}{ADMG of class \code{mixedgraph}}
 
 \item{collect}{logical: should cliques of bidirected edges become a single latent?}
+
+\item{where}{location to insert latent variables}
 }
 \description{
 Canonical DAG for an ADMG

@@ -49,9 +49,12 @@ latentProject <- function(graph, latent, v, only_directed=FALSE, sort=1) {
 ##' 
 ##' @param graph ADMG of class \code{mixedgraph}
 ##' @param collect logical: should cliques of bidirected edges become a single latent?
+##' @param where location to insert latent variables
 ##' 
 ##' @export
-canonicalDAG <- function (graph, collect=TRUE) {
+canonicalDAG <- function (graph, collect=TRUE, where=1) {
+  if (where == "end") where <- nv(graph) + 1
+  if (where > nv(graph) + 1) where <- nv(graph) + 1
   if (collect) {
     lts <- cliques(skeleton(graph[etype="bidirected"]))
     lts <- lts[lengths(lts) > 1]
@@ -71,8 +74,9 @@ canonicalDAG <- function (graph, collect=TRUE) {
   out <- addNodes(graph[etype="directed"], nl)
   out <- addEdges(out, directed=new_dir)
   
-  ## put latent variables first 
-  out <- out[c(nv + seq_len(nl), seq_len(nv)), order=TRUE]
+  ## put latent variables in requested location
+  out <- out[c(seq_len(where-1),nv + seq_len(nl), seq(from=where,to=nv, length=nv-where+1)), order=TRUE]
+  # out <- out[c(nv + seq_len(nl), seq_len(nv)), order=TRUE]
   
   return(out)
 }

@@ -7,7 +7,7 @@
 rDAGdist(n, graph, dims = rep(2L, nv(graph)), alpha = 1)
 }
 \arguments{
-\item{n}{a DAG object of class \code{mixedgraph}}
+\item{n}{number of distributions to simulate}
 
 \item{graph}{a DAG object of class \code{mixedgraph}}
 
