@@ -1,22 +1,23 @@
 Package: ADMGs2
 Title: Functions for Describing and Fitting Discrete Mixed Graphs
-Version: 0.6.3
+Version: 0.6.4
 Authors@R: c(
   person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre")),
   person("Ilya", "Shpitser", , "ilyas@cs.jhu.edu", role = c("aut")))
 Description: Functions for manipulating and fitting models with discrete 
              mixed graphs. 
 Depends: R (>= 3.1.2),
-         MixedGraphs (>= 0.7.5),
+         MixedGraphs (>= 0.7.6),
          contingency (>= 0.0.6)
 Imports: Matrix,
          methods,
          numDeriv,
-         rje (>= 1.10.15),
+         rje (>= 1.13.0),
          utils,
 License: GPL-2
 LazyData: true
 RoxygenNote: 7.3.1
+Roxygen: list(markdown = TRUE)
 Suggests: 
     testthat,
     knitr,

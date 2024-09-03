@@ -193,7 +193,10 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
   out <- list()
   
   ## start with sets from undirected part of graph
-  und_comp <- graph[un(graph), etype="undirected"]
+  unG <- un(graph)
+  und_comp <- graph[unG, etype="undirected"]
+  if (any(lengths(sapply(graph$v, function (x) c(pa(graph, x), sib(graph, x)))) > 0 
+          & (graph$v %in% unG))) stop("Not a euphonious/summary graph")
   
   clq <- cliques(und_comp)
   for (i in seq_along(clq)) {
@@ -207,10 +210,13 @@ subsetRep <- function (graph, max_size, sort=1, r=FALSE) {
     if (any(duplicated(fn))) out <- out[!duplicated(fn)]
   }
   
+  graph$edges$undirected <- NULL
+  
   ## now obtain sets from directed part of graph
   ht <- headsTails(graph, r=r, max_head = max_size, by_district = FALSE)
   
   for (i in seq_along(ht$heads)) {
+    if (all(ht$heads[[i]] %in% unG)) next
     ps <- powerSet(ht$tails[[i]], m=max_size-length(ht$heads[[i]]))
     tmp <- lapply(ps, function(x) c(ht$heads[[i]], x))
     out <- c(out, c(tmp))
